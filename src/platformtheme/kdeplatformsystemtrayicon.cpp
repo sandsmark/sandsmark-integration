@@ -339,7 +339,7 @@ void KDEPlatformSystemTrayIcon::showMessage(const QString &title, const QString 
     m_sni->showMessage(title, msg, icon.name(), secs);
 }
 
-bool KDEPlatformSystemTrayIcon::isSystemTrayAvailable() const
+bool KDEPlatformSystemTrayIcon::isStatusNotifierAvailable()
 {
     QDBusInterface systrayHost(QStringLiteral("org.kde.StatusNotifierWatcher"), QStringLiteral("/StatusNotifierWatcher"), QStringLiteral("org.kde.StatusNotifierWatcher"));
     if (systrayHost.isValid()) {
@@ -347,6 +347,11 @@ bool KDEPlatformSystemTrayIcon::isSystemTrayAvailable() const
     }
 
     return false;
+}
+
+bool KDEPlatformSystemTrayIcon::isSystemTrayAvailable() const
+{
+    return isStatusNotifierAvailable();
 }
 
 bool KDEPlatformSystemTrayIcon::supportsMessages() const

@@ -104,6 +104,8 @@ public:
 
     QPlatformMenu *createMenu() const Q_DECL_OVERRIDE;
 
+    static bool isStatusNotifierAvailable();
+
 private:
     KStatusNotifierItem *m_sni;
 };

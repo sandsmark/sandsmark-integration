@@ -286,5 +286,11 @@ QPlatformDialogHelper *KdePlatformTheme::createPlatformDialogHelper(QPlatformThe
 
 QPlatformSystemTrayIcon *KdePlatformTheme::createPlatformSystemTrayIcon() const
 {
+    // Ensure that KSNI doesn't try to recursively call this
+    if (!KDEPlatformSystemTrayIcon::isStatusNotifierAvailable()) {
+        qWarning() << "Status notifier host unavailable, can't create KDE system tray icon";
+        return QPlatformTheme::createPlatformSystemTrayIcon();
+    }
+
     return new KDEPlatformSystemTrayIcon;
 }
