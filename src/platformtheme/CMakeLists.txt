@@ -27,9 +27,9 @@ set(platformtheme_SRCS
 include_directories(
     ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
 )
-add_library(KDEPlasmaPlatformTheme MODULE ${platformtheme_SRCS})
+add_library(SandsmarkPlatformTheme MODULE ${platformtheme_SRCS})
 
-target_link_libraries(KDEPlasmaPlatformTheme
+target_link_libraries(SandsmarkPlatformTheme
     PRIVATE
         Qt5::DBus
         Qt5::X11Extras
@@ -46,10 +46,10 @@ target_link_libraries(KDEPlasmaPlatformTheme
 )
 
 if(HAVE_X11)
-  target_link_libraries(KDEPlasmaPlatformTheme PRIVATE Qt5::X11Extras ${X11_Xcursor_LIB})
+  target_link_libraries(SandsmarkPlatformTheme PRIVATE Qt5::X11Extras ${X11_Xcursor_LIB})
 endif()
 
-install(TARGETS KDEPlasmaPlatformTheme DESTINATION ${KDE_INSTALL_QTPLUGINDIR}/platformthemes)
+install(TARGETS SandsmarkPlatformTheme DESTINATION ${KDE_INSTALL_QTPLUGINDIR}/platformthemes)
 
 install(FILES fonts_global.upd fonts_akregator.upd fonts_kate.upd DESTINATION ${KDE_INSTALL_KCONFUPDATEDIR})
 install(PROGRAMS fonts_global.pl fonts_akregator.pl fonts_kate.pl DESTINATION ${KDE_INSTALL_KCONFUPDATEDIR})

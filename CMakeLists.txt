@@ -34,7 +34,7 @@ find_package(KF5 REQUIRED
     Wayland
     )
 
-add_definitions(-DTRANSLATION_DOMAIN=\"plasmaintegration5\")
+add_definitions(-DTRANSLATION_DOMAIN=\"sandsmarkintegration5\")
 if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/po")
     ki18n_install(po)
 endif()
