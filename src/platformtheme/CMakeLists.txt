@@ -50,6 +50,3 @@ if(HAVE_X11)
 endif()
 
 install(TARGETS SandsmarkPlatformTheme DESTINATION ${KDE_INSTALL_QTPLUGINDIR}/platformthemes)
-
-install(FILES fonts_global.upd fonts_akregator.upd fonts_kate.upd DESTINATION ${KDE_INSTALL_KCONFUPDATEDIR})
-install(PROGRAMS fonts_global.pl fonts_akregator.pl fonts_kate.pl DESTINATION ${KDE_INSTALL_KCONFUPDATEDIR})
