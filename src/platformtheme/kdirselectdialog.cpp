@@ -274,13 +274,9 @@ void KDirSelectDialog::Private::slotProperties()
     dialog->show();
 }
 
-KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget *parent)
-// #ifdef Q_OS_WIN
-//     : QDialog(parent, Qt::WindowMinMaxButtonsHint),
-// #else
-//     : QDialog(parent),
-// #endif
-     : d(new Private(localOnly, this))
+KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget *parent) :
+    KDEPlatformFileDialogBase(parent),
+    d(new Private(localOnly, this))
 {
     setWindowTitle(i18nc("@title:window", "Select Folder"));
 

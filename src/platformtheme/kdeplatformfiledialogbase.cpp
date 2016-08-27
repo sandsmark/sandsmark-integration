@@ -20,7 +20,7 @@
 
 #include "kdeplatformfiledialogbase_p.h"
 
-KDEPlatformFileDialogBase::KDEPlatformFileDialogBase()
+KDEPlatformFileDialogBase::KDEPlatformFileDialogBase(QWidget *parent) : QDialog(parent)
 {
     m_timer.setInterval(0);
     m_timer.setSingleShot(true);

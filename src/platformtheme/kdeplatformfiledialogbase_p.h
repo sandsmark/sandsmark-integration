@@ -33,7 +33,7 @@ class KDEPlatformFileDialogBase : public QDialog
 public:
     friend class KDEPlatformFileDialogHelper;
 
-    explicit KDEPlatformFileDialogBase();
+    explicit KDEPlatformFileDialogBase(QWidget *parent = nullptr);
     virtual QUrl directory() = 0;
     virtual void selectNameFilter(const QString &filter) = 0;
     virtual void setDirectory(const QUrl &directory) = 0;
