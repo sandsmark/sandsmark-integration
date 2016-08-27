@@ -1,11 +1,11 @@
 # Framework Integration
 
-Integration of Qt application with KDE workspaces
+Integration of Qt application with Sandsmark's hacky setup.
 
 ## Introduction
 
 Framework Integration is a set of plugins responsible for better integration of
-Qt applications when running on a KDE Plasma workspace.
+Qt applications when running on Sandsmark's hacky setup.
 
 Applications do not need to link to this directly.
 
@@ -13,6 +13,6 @@ Applications do not need to link to this directly.
 
 ### KDEPlatformTheme
 
-The plugin KDEPlatformTheme provides KDE integration for
+The plugin SandsmarkPlatformTheme provides KDE integration for
 QPlatformThemePlugin.
 
