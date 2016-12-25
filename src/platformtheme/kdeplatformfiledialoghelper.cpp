@@ -330,11 +330,11 @@ void KDEPlatformFileDialogHelper::restoreSize()
 
 bool KDEPlatformFileDialogHelper::show(Qt::WindowFlags windowFlags, Qt::WindowModality windowModality, QWindow *parent)
 {
-    Q_UNUSED(parent)
     initializeDialog();
     m_dialog->setWindowFlags(windowFlags);
     m_dialog->setWindowModality(windowModality);
     restoreSize();
+    m_dialog->windowHandle()->setTransientParent(parent);
     // Use a delayed show here to delay show() after the internal Qt invisible QDialog.
     // The delayed call shouldn't matter, because for other "real" native QPlatformDialog
     // implementation like Mac and Windows, the native dialog is not necessarily
@@ -361,6 +361,12 @@ QUrl KDEPlatformFileDialogHelper::directory() const
 void KDEPlatformFileDialogHelper::selectFile(const QUrl &filename)
 {
     m_dialog->selectFile(filename);
+    // Qt 5 at least <= 5.8.0 does not derive the directory from the passed url
+    // and set the initialDirectory option accordingly, also not for known schemes
+    // like file://, so we have to do it ourselves
+    QSharedPointer<QFileDialogOptions> opt = options()->clone();
+    opt->setInitialDirectory(m_dialog->directory());
+    setOptions(opt);
 }
 
 void KDEPlatformFileDialogHelper::setDirectory(const QUrl &directory)
