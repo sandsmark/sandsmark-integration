@@ -281,7 +281,9 @@ void KDEPlatformFileDialogHelper::initializeDialog()
             dialog->m_fileWidget->setFilter(qt2KdeFilter(nameFilters));
         }
 
-        if (!options()->initiallySelectedNameFilter().isEmpty()) {
+        if (!options()->initiallySelectedMimeTypeFilter().isEmpty()) {
+            selectMimeTypeFilter(options()->initiallySelectedMimeTypeFilter());
+        } else if (!options()->initiallySelectedNameFilter().isEmpty()) {
             selectNameFilter(options()->initiallySelectedNameFilter());
         }
 
@@ -371,7 +373,9 @@ void KDEPlatformFileDialogHelper::selectFile(const QUrl &filename)
 
 void KDEPlatformFileDialogHelper::setDirectory(const QUrl &directory)
 {
-    m_dialog->setDirectory(directory);
+    if (!directory.isEmpty()) {
+        m_dialog->setDirectory(directory);
+    }
 }
 
 void KDEPlatformFileDialogHelper::selectNameFilter(const QString &filter)
