@@ -28,8 +28,7 @@
 #include "kwaylandintegration.h"
 #include "x11integration.h"
 
-#include <QCoreApplication>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QFont>
 #include <QPalette>
 #include <QString>
@@ -220,6 +219,10 @@ QList<QKeySequence> KdePlatformTheme::keyBindings(QKeySequence::StandardKey key)
 
 bool KdePlatformTheme::usePlatformNativeDialog(QPlatformTheme::DialogType type) const
 {
+    if (!qobject_cast<QApplication*>(qApp)) {
+        return false;
+    }
+
     return type == QPlatformTheme::FileDialog;
 }
 
