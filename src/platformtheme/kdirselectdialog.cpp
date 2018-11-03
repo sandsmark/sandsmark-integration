@@ -67,7 +67,7 @@ public:
         : m_parent(parent),
           m_localOnly(localOnly),
           m_comboLocked(false),
-          m_urlCombo(0)
+          m_urlCombo(nullptr)
     {
     }
 
@@ -251,7 +251,7 @@ void KDirSelectDialog::Private::slotMoveToTrash()
     if (job.askDeleteConfirmation(QList<QUrl>() << url, KIO::JobUiDelegate::Trash, KIO::JobUiDelegate::DefaultConfirmation)) {
         KIO::CopyJob *copyJob = KIO::trash(url);
         KJobWidgets::setWindow(copyJob, m_parent);
-        copyJob->ui()->setAutoErrorHandlingEnabled(true);
+        copyJob->uiDelegate()->setAutoErrorHandlingEnabled(true);
     }
 }
 
@@ -262,13 +262,13 @@ void KDirSelectDialog::Private::slotDelete()
     if (job.askDeleteConfirmation(QList<QUrl>() << url, KIO::JobUiDelegate::Delete, KIO::JobUiDelegate::DefaultConfirmation)) {
         KIO::DeleteJob *deleteJob = KIO::del(url);
         KJobWidgets::setWindow(deleteJob, m_parent);
-        deleteJob->ui()->setAutoErrorHandlingEnabled(true);
+        deleteJob->uiDelegate()->setAutoErrorHandlingEnabled(true);
     }
 }
 
 void KDirSelectDialog::Private::slotProperties()
 {
-    KPropertiesDialog *dialog = 0;
+    KPropertiesDialog *dialog = nullptr;
     dialog = new KPropertiesDialog(m_treeView->selectedUrl(), this->m_parent);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();

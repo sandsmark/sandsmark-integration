@@ -34,6 +34,7 @@
 #include <QGuiApplication>
 #include <QDialogButtonBox>
 #include <QScreen>
+#include <QStandardPaths>
 
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -56,7 +57,7 @@
 static const QString defaultLookAndFeelPackage = QStringLiteral("org.kde.breeze.desktop");
 
 KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
-    : QObject(0)
+    : QObject(nullptr)
     , mKdeGlobals(kdeglobals)
 {
     if (!mKdeGlobals) {
@@ -123,6 +124,8 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
     bool showIcons = cg.readEntry("ShowIconsInMenuItems", !QApplication::testAttribute(Qt::AA_DontShowIconsInMenus));
     QCoreApplication::setAttribute(Qt::AA_DontShowIconsInMenus, !showIcons);
 
+    m_hints[QPlatformTheme::ShowShortcutsInContextMenus] = true;
+
     QMetaObject::invokeMethod(this, "delayedDBusConnects", Qt::QueuedConnection);
     QMetaObject::invokeMethod(this, "setupIconLoader", Qt::QueuedConnection);
 
@@ -168,22 +171,11 @@ QStringList KHintsSettings::xdgIconThemePaths() const
 {
     QStringList paths;
 
+    paths << QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, QStringLiteral("icons"), QStandardPaths::LocateDirectory);
+
     const QFileInfo homeIconDir(QDir::homePath() + QStringLiteral("/.icons"));
     if (homeIconDir.isDir()) {
         paths << homeIconDir.absoluteFilePath();
-    }
-
-    QString xdgDirString = QFile::decodeName(qgetenv("XDG_DATA_DIRS"));
-
-    if (xdgDirString.isEmpty()) {
-        xdgDirString = QStringLiteral("/usr/local/share:/usr/share");
-    }
-
-    foreach (const QString &xdgDir, xdgDirString.split(QLatin1Char(':'))) {
-        const QFileInfo xdgIconsDir(xdgDir + QStringLiteral("/icons"));
-        if (xdgIconsDir.isDir()) {
-            paths << xdgIconsDir.absoluteFilePath();
-        }
     }
 
     return paths;

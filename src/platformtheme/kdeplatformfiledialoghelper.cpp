@@ -31,13 +31,14 @@
 #include <KSharedConfig>
 #include <KWindowConfig>
 #include <KProtocolInfo>
+#include <kio_version.h>
+#include <KIO/StatJob>
+#include <KJobWidgets>
+
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QWindow>
-
-#include <KIO/StatJob>
-#include <KJobWidgets>
 
 #include <QTextStream>
 
@@ -105,10 +106,15 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     m_buttons->addButton(m_fileWidget->okButton(), QDialogButtonBox::AcceptRole);
     m_buttons->addButton(m_fileWidget->cancelButton(), QDialogButtonBox::RejectRole);
     connect(m_buttons, SIGNAL(rejected()), m_fileWidget, SLOT(slotCancel()));
+    // Also call the cancel function when the dialog is closed via the escape key
+    // or titlebar close button to make sure we always save the view config
+    connect(this, &KDEPlatformFileDialog::rejected,
+            m_fileWidget, &KFileWidget::slotCancel);
     connect(m_fileWidget->okButton(), SIGNAL(clicked(bool)), m_fileWidget, SLOT(slotOk()));
     connect(m_fileWidget, SIGNAL(accepted()), m_fileWidget, SLOT(accept()));
     connect(m_fileWidget, SIGNAL(accepted()), SLOT(accept()));
     connect(m_fileWidget->cancelButton(), SIGNAL(clicked(bool)), SLOT(reject()));
+    connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
     layout()->addWidget(m_buttons);
 }
 
@@ -126,7 +132,7 @@ void KDEPlatformFileDialog::selectFile(const QUrl &filename)
 {
     QUrl dirUrl = filename.adjusted(QUrl::RemoveFilename);
     m_fileWidget->setUrl(dirUrl);
-    m_fileWidget->setSelection(filename.fileName());
+    m_fileWidget->setSelectedUrl(filename);
 }
 
 void KDEPlatformFileDialog::setViewMode(QFileDialogOptions::ViewMode view)
@@ -199,7 +205,7 @@ void KDEPlatformFileDialog::setDirectory(const QUrl &directory)
             if (!entry.isDir()) {
                 // this is probably a file remove the file part
                 m_fileWidget->setUrl(directory.adjusted(QUrl::RemoveFilename));
-                m_fileWidget->setSelection(directory.fileName());
+                m_fileWidget->setSelectedUrl(directory);
             }
             else {
                 m_fileWidget->setUrl(directory);
@@ -241,6 +247,7 @@ KDEPlatformFileDialogHelper::~KDEPlatformFileDialogHelper()
 
 void KDEPlatformFileDialogHelper::initializeDialog()
 {
+    m_dialogInitialized = true;
     if (options()->testOption(QFileDialogOptions::ShowDirsOnly)) {
         m_dialog->deleteLater();
         m_dialog = new KDirSelectDialog(options()->initialDirectory());
@@ -257,7 +264,9 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         } else {
             dialog->setWindowTitle(options()->windowTitle());
         }
-        setDirectory(options()->initialDirectory());
+        if (!m_directorySet) {
+            setDirectory(options()->initialDirectory());
+        }
         //dialog->setViewMode(options()->viewMode()); // don't override our options, fixes remembering the chosen view mode and sizes!
         dialog->setFileMode(options()->fileMode());
 
@@ -293,6 +302,8 @@ void KDEPlatformFileDialogHelper::initializeDialog()
          } else if (options()->acceptMode() == QFileDialogOptions::AcceptSave) {
              dialog->m_fileWidget->setConfirmOverwrite(true);
         }
+
+        dialog->m_fileWidget->setSupportedSchemes(options()->supportedSchemes());
     }
 }
 
@@ -362,19 +373,22 @@ QUrl KDEPlatformFileDialogHelper::directory() const
 
 void KDEPlatformFileDialogHelper::selectFile(const QUrl &filename)
 {
+    // This is called once by QFileDialogPrivate::init -> QFileDialog::selectUrl -> QFileDialogPrivate::selectFil  e_sys
+    // and then again by selectFile in the QFileDialog constructor, with a wrong value for remote URLs, until the   Qt 5.11.2 fix.
+#if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
+    if (m_fileSelected && !m_dialogInitialized) {
+        return;
+    }
+#endif
     m_dialog->selectFile(filename);
-    // Qt 5 at least <= 5.8.0 does not derive the directory from the passed url
-    // and set the initialDirectory option accordingly, also not for known schemes
-    // like file://, so we have to do it ourselves
-    QSharedPointer<QFileDialogOptions> opt = options()->clone();
-    opt->setInitialDirectory(m_dialog->directory());
-    setOptions(opt);
+    m_fileSelected = true;
 }
 
 void KDEPlatformFileDialogHelper::setDirectory(const QUrl &directory)
 {
     if (!directory.isEmpty()) {
         m_dialog->setDirectory(directory);
+        m_directorySet = true;
     }
 }
 

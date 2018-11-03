@@ -47,6 +47,11 @@ QPlatformMenuItem *SystemTrayMenu::createMenuItem() const
     return new SystemTrayMenuItem();
 }
 
+QPlatformMenu *SystemTrayMenu::createSubMenu() const
+{
+    return new SystemTrayMenu();
+}
+
 void SystemTrayMenu::insertMenuItem(QPlatformMenuItem *menuItem, QPlatformMenuItem *before)
 {
     if (SystemTrayMenuItem *ours = qobject_cast<SystemTrayMenuItem*>(menuItem)) {
@@ -242,6 +247,21 @@ void SystemTrayMenuItem::setIconSize(int size)
     Q_UNUSED(size);
 }
 
+void SystemTrayMenuItem::setHasExclusiveGroup(bool hasExclusiveGroup)
+{
+    if (hasExclusiveGroup) {
+        if (!m_action->actionGroup()) {
+            m_action->setActionGroup(new QActionGroup(m_action));
+        }
+    } else {
+        QActionGroup *actionGroup = m_action->actionGroup();
+        if (actionGroup) {
+            m_action->setActionGroup(nullptr);
+            delete actionGroup;
+        }
+    }
+}
+
 quintptr SystemTrayMenuItem::tag() const
 {
     return m_tag;
@@ -275,7 +295,7 @@ void KDEPlatformSystemTrayIcon::init()
         });
         connect(m_sni, &KStatusNotifierItem::secondaryActivateRequested, [this](const QPoint &pos) {
             Q_UNUSED(pos)
-            emit activated(QPlatformSystemTrayIcon::Context);
+            emit activated(QPlatformSystemTrayIcon::MiddleClick);
         });
     }
 }

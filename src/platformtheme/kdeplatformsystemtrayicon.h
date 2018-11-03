@@ -47,6 +47,7 @@ public:
     void syncSeparatorsCollapsible(bool enable) Q_DECL_OVERRIDE;
     quintptr tag() const Q_DECL_OVERRIDE;
     QPlatformMenuItem *createMenuItem() const Q_DECL_OVERRIDE;
+    QPlatformMenu *createSubMenu() const override;
 
     QMenu *menu() const;
 
@@ -76,6 +77,7 @@ public:
     void setVisible(bool isVisible) Q_DECL_OVERRIDE;
     quintptr tag() const Q_DECL_OVERRIDE;
     void setIconSize(int size) Q_DECL_OVERRIDE;
+    void setHasExclusiveGroup(bool hasExclusiveGroup) override;
 
     QAction *action() const;
 

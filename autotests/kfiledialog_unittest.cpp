@@ -97,7 +97,7 @@ private Q_SLOTS:
             KFileWidget *fw = findFileWidget();
             QVERIFY(fw);
             // real show() is delayed to next event.
-            QTest::qWaitForWindowExposed(fw->window());
+            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             KDirOperator *op = fw->dirOperator();
             QCOMPARE(fileViewToString(op->viewMode()), fileViewToString(KFile::Tree));
             fw->setViewMode(KFile::Simple);
@@ -127,7 +127,7 @@ private Q_SLOTS:
             KFileWidget *fw = findFileWidget();
             QVERIFY(fw);
             // real show() is delayed to next event.
-            QTest::qWaitForWindowExposed(fw->window());
+            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             QCOMPARE(fw->isVisible(), true);
             fw->slotCancel();
         }
@@ -142,7 +142,7 @@ private Q_SLOTS:
             KFileWidget *fw = findFileWidget();
             QVERIFY(fw);
             // real show() is delayed to next event.
-            QTest::qWaitForWindowExposed(fw->window());
+            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             QCOMPARE(fw->isVisible(), true);
             fw->slotCancel();
         }
@@ -158,7 +158,7 @@ private Q_SLOTS:
             KFileWidget *fw = findFileWidget();
             QVERIFY(fw);
             // real show() is delayed to next event.
-            QTest::qWaitForWindowExposed(fw->window());
+            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             QCOMPARE(fw->isVisible(), true);
             fw->slotCancel();
         }
@@ -173,7 +173,7 @@ private Q_SLOTS:
             KFileWidget *fw = findFileWidget();
             QVERIFY(fw);
             // real show() is delayed to next event.
-            QTest::qWaitForWindowExposed(fw->window());
+            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             QCOMPARE(fw->isVisible(), true);
             fw->slotCancel();
         }
@@ -233,7 +233,7 @@ private Q_SLOTS:
 
         KFileWidget *fw = findFileWidget();
         QVERIFY(fw);
-        QTest::qWaitForWindowExposed(fw->window());
+        QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
         QCOMPARE(fw->isVisible(), true);
 
         messageBoxSeen = false;
@@ -249,7 +249,7 @@ protected Q_SLOTS:
     {
         QDialog *msgbox = findMessageBox();
         if (!msgbox) return;
-        QTest::qWaitForWindowExposed(msgbox);
+        QVERIFY(QTest::qWaitForWindowExposed(msgbox));
         QCOMPARE(msgbox->isVisible(), true);
         messageBoxSeen = true;
         msgbox->close();
