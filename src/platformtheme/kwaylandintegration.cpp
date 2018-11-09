@@ -31,7 +31,7 @@ using namespace KWayland::Client;
 
 KWaylandIntegration::KWaylandIntegration()
     : QObject()
-    , m_decoration(Q_NULLPTR)
+    , m_decoration(nullptr)
 {
 }
 

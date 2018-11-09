@@ -48,7 +48,7 @@ int main(int argc, char **argv)
         qDebug() << dir;
         return 0;
     } else if (staticFunction == QLatin1String("getOpenFileUrl")) {
-        qDebug() << QFileDialog::getOpenFileUrl(Q_NULLPTR, QStringLiteral("getOpenFileUrl test"), QUrl::fromLocalFile(QDir::homePath()));
+        qDebug() << QFileDialog::getOpenFileUrl(nullptr, QStringLiteral("getOpenFileUrl test"), QUrl::fromLocalFile(QDir::homePath()));
         return 0;
     }
 
