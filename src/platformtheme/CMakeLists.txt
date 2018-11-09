@@ -24,15 +24,14 @@ set(platformtheme_SRCS
     main.cpp
 )
 
-include_directories(
-    ${Qt5Gui_PRIVATE_INCLUDE_DIRS}
-)
 add_library(SandsmarkPlatformTheme MODULE ${platformtheme_SRCS})
 
 target_link_libraries(SandsmarkPlatformTheme
     PRIVATE
+        Qt5::GuiPrivate
         Qt5::DBus
         Qt5::X11Extras
+        Qt5::QuickControls2
         KF5::ConfigWidgets
         KF5::ConfigCore
         KF5::IconThemes
@@ -43,6 +42,8 @@ target_link_libraries(SandsmarkPlatformTheme
         KF5::Notifications
         KF5::WindowSystem
         KF5::WaylandClient
+        ${QT5PLATFORMSUPPORT_LIBS}
+
 )
 
 if(HAVE_X11)

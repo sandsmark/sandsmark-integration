@@ -20,7 +20,12 @@ include(KDEInstallDirs)
 include(KDEFrameworkCompilerSettings NO_POLICY_SCOPE)
 include(KDECMakeSettings)
 
-find_package(Qt5 5.5.0 CONFIG REQUIRED Widgets DBus X11Extras)
+find_package(Qt5 5.5.0 CONFIG REQUIRED
+    Widgets
+    DBus
+    X11Extras
+    QuickControls2
+    )
 
 find_package(KF5 REQUIRED
     Config
