@@ -31,7 +31,7 @@ public:
     virtual ~X11Integration();
     void init();
 
-    bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     

@@ -38,7 +38,7 @@ public:
     virtual ~KWaylandIntegration();
     void init();
 
-    bool eventFilter(QObject *watched, QEvent *event) Q_DECL_OVERRIDE;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     KWayland::Client::ServerSideDecorationManager *m_decoration;

@@ -39,18 +39,18 @@ public:
     KdePlatformTheme();
     ~KdePlatformTheme();
 
-    QVariant themeHint(ThemeHint hint) const Q_DECL_OVERRIDE;
-    const QPalette *palette(Palette type = SystemPalette) const Q_DECL_OVERRIDE;
-    const QFont *font(Font type) const Q_DECL_OVERRIDE;
-    QIconEngine *createIconEngine(const QString &iconName) const Q_DECL_OVERRIDE;
-    QList<QKeySequence> keyBindings(QKeySequence::StandardKey key) const Q_DECL_OVERRIDE;
+    QVariant themeHint(ThemeHint hint) const override;
+    const QPalette *palette(Palette type = SystemPalette) const override;
+    const QFont *font(Font type) const override;
+    QIconEngine *createIconEngine(const QString &iconName) const override;
+    QList<QKeySequence> keyBindings(QKeySequence::StandardKey key) const override;
 
-    QPlatformDialogHelper *createPlatformDialogHelper(DialogType type) const Q_DECL_OVERRIDE;
-    bool usePlatformNativeDialog(DialogType type) const Q_DECL_OVERRIDE;
+    QPlatformDialogHelper *createPlatformDialogHelper(DialogType type) const override;
+    bool usePlatformNativeDialog(DialogType type) const override;
 
-    QString standardButtonText(int button) const Q_DECL_OVERRIDE;
+    QString standardButtonText(int button) const override;
 
-    QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const Q_DECL_OVERRIDE;
+    QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override;
 
 private:
     void loadSettings();
