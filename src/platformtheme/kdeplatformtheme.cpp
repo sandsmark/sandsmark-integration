@@ -71,6 +71,15 @@ QVariant KdePlatformTheme::themeHint(QPlatformTheme::ThemeHint hintType) const
     }
 }
 
+QIcon KdePlatformTheme::fileIcon(const QFileInfo &fileInfo, QPlatformTheme::IconOptions iconOptions) const
+{
+    if (iconOptions.testFlag(DontUseCustomDirectoryIcons) && fileInfo.isDir()) {
+        return QIcon::fromTheme(QLatin1String("inode-directory"));
+    }
+
+    return QIcon::fromTheme(KIO::iconNameForUrl(QUrl::fromLocalFile(fileInfo.absoluteFilePath())));
+}
+
 const QPalette *KdePlatformTheme::palette(Palette type) const
 {
     QPalette *palette = m_hints->palette(type);

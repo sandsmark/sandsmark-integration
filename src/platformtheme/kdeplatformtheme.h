@@ -40,6 +40,8 @@ public:
     ~KdePlatformTheme();
 
     QVariant themeHint(ThemeHint hint) const override;
+    QIcon fileIcon(const QFileInfo &fileInfo,
+                           QPlatformTheme::IconOptions iconOptions) const override;
     const QPalette *palette(Palette type = SystemPalette) const override;
     const QFont *font(Font type) const override;
     QIconEngine *createIconEngine(const QString &iconName) const override;
