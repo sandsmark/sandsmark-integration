@@ -55,7 +55,7 @@ static const char DefaultFont[] =    "Noto Sans";
 static const KFontData DefaultFontData[KFontSettingsData::FontTypesCount] = {
     { GeneralId, "font",                 DefaultFont,  10, -1, QFont::SansSerif },
     { GeneralId, "fixed",                "Hack",  9, -1, QFont::Monospace },
-    { GeneralId, "toolBarFont",          DefaultFont,  9, -1, QFont::SansSerif },
+    { GeneralId, "toolBarFont",          DefaultFont,  10, -1, QFont::SansSerif },
     { GeneralId, "menuFont",             DefaultFont,  10, -1, QFont::SansSerif },
     { "WM",      "activeFont",           DefaultFont,  10, -1, QFont::SansSerif },
     { GeneralId, "taskbarFont",          DefaultFont,  10, -1, QFont::SansSerif },
