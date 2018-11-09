@@ -56,6 +56,7 @@ public:
 
 private:
     void loadSettings();
+    void setQtQuickControlsTheme();
 
     KHintsSettings *m_hints;
     KFontSettingsData *m_fontsData;
