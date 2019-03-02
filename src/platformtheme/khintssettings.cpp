@@ -92,7 +92,8 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
 
     QStringList styleNames{
-        QStringLiteral(BREEZE_STYLE_NAME),
+        QStringLiteral("breeze"),
+        QStringLiteral("sandsmarkstyle"),
         QStringLiteral("oxygen"),
         QStringLiteral("fusion"),
         QStringLiteral("windows")
@@ -264,7 +265,8 @@ void KHintsSettings::slotNotifyChange(int type, int arg)
 
         QStringList styleNames;
         styleNames << cg.readEntry("widgetStyle", QString())
-                << QStringLiteral(BREEZE_STYLE_NAME)
+                << QStringLiteral("breeze")
+                << QStringLiteral("sandsmarkstyle")
                 << QStringLiteral("oxygen")
                 << QStringLiteral("fusion")
                 << QStringLiteral("windows");

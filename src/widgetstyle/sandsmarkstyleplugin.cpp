@@ -3,7 +3,7 @@
 
 QStringList SandsmarkStylePlugin::keys() const
 {
-    return {"SandsmarkStyle"};
+    return {"sandsmarkstyle"};
 }
 
 QStyle *SandsmarkStylePlugin::create(const QString &key)

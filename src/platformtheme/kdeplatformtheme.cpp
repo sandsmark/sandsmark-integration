@@ -294,7 +294,6 @@ QPlatformDialogHelper *KdePlatformTheme::createPlatformDialogHelper(QPlatformThe
     case QPlatformTheme::FileDialog: {
         // For some reason the app doesn't quit if it uses a KDEPlatformFileDialogHelper
         QApplication *app = qobject_cast<QApplication*>(qApp);
-//        if (!app && app->lo)
         if (!app) {
             return nullptr;
         }
