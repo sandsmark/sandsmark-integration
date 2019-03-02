@@ -10,5 +10,5 @@ QStyle *SandsmarkStylePlugin::create(const QString &key)
 {
     if (key.toLower() == "sandsmarkstyle")
         return new SandsmarkStyle;
-    return 0;
+    return nullptr;
 }
