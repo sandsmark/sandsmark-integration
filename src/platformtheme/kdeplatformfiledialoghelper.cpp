@@ -337,7 +337,12 @@ void KDEPlatformFileDialogHelper::initializeDialog()
              dialog->m_fileWidget->setConfirmOverwrite(true);
         }
 
-        dialog->m_fileWidget->setSupportedSchemes(options()->supportedSchemes());
+        QStringList supportedSchemes = options()->supportedSchemes();
+        if (!supportedSchemes.isEmpty() && !supportedSchemes.contains("recentdocuments")) {
+            supportedSchemes.append("recentdocuments");
+        }
+
+        dialog->m_fileWidget->setSupportedSchemes(supportedSchemes);
     }
 }
 
