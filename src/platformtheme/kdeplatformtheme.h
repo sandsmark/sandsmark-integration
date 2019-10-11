@@ -53,6 +53,7 @@ public:
     QString standardButtonText(int button) const override;
 
     QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override;
+    QPlatformMenuBar *createPlatformMenuBar() const override;
 
 private:
     void loadSettings();

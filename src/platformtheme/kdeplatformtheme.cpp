@@ -84,6 +84,11 @@ QIcon KdePlatformTheme::fileIcon(const QFileInfo &fileInfo, QPlatformTheme::Icon
     return QIcon::fromTheme(KIO::iconNameForUrl(QUrl::fromLocalFile(fileInfo.absoluteFilePath())));
 }
 
+QPlatformMenuBar *KdePlatformTheme::createPlatformMenuBar() const
+{
+    return nullptr;
+}
+
 const QPalette *KdePlatformTheme::palette(Palette type) const
 {
     QPalette *palette = m_hints->palette(type);
