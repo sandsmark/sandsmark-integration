@@ -34,6 +34,7 @@ target_link_libraries(SandsmarkPlatformTheme
         Qt5::QuickControls2
         KF5::ConfigWidgets
         KF5::ConfigCore
+        KF5::CoreAddons
         KF5::IconThemes
         KF5::KIOFileWidgets # KFileFilterCombo, KDirSortFilterProxyModel, KRecentDirs
         KF5::KIOWidgets

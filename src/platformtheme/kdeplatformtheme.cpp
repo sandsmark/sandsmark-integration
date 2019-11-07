@@ -48,6 +48,7 @@
 
 KdePlatformTheme::KdePlatformTheme()
 {
+    qDebug() << "Hello";
     loadSettings();
     if (QGuiApplication::platformName().startsWith(QLatin1String("wayland"))) {
         m_kwaylandIntegration.reset(new KWaylandIntegration());
