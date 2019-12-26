@@ -76,8 +76,8 @@ static void qt_fusion_draw_arrow(Qt::ArrowType type, QPainter *painter, const QS
     if (rect.isEmpty())
         return;
 
-    const int arrowWidth = QStyleHelper::dpiScaled(14);
-    const int arrowHeight = QStyleHelper::dpiScaled(8);
+    const int arrowWidth = QStyleHelper::dpiScaled(14, option);
+    const int arrowHeight = QStyleHelper::dpiScaled(8, option);
 
     const int arrowMax = qMin(arrowHeight, arrowWidth);
     const int rectMax = qMin(rect.height(), rect.width());
@@ -87,7 +87,7 @@ static void qt_fusion_draw_arrow(Qt::ArrowType type, QPainter *painter, const QS
     QString cacheKey = uniqueName(QLatin1String("fusion-arrow"), option, rect.size())
             % HexString<uint>(type)
             % HexString<uint>(color.rgba());
-    if (!QPixmapCache::find(cacheKey, cachePixmap)) {
+    if (!QPixmapCache::find(cacheKey, &cachePixmap)) {
         cachePixmap = styleCachePixmap(rect.size());
         cachePixmap.fill(Qt::transparent);
         QPainter cachePainter(&cachePixmap);
@@ -153,7 +153,7 @@ static QColor mergedColors(const QColor &colorA, const QColor &colorB, int facto
 static QColor getOutline(const QPalette &pal) {
     if (pal.window().style() == Qt::TexturePattern)
         return QColor(0, 0, 0, 160);
-    return pal.background().color().darker(140);
+    return pal.window().color().darker(140);
 }
 
 
