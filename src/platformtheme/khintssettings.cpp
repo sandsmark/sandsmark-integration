@@ -92,10 +92,10 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
 
     QStringList styleNames{
-        QStringLiteral("breeze"),
         QStringLiteral("sandsmarkstyle"),
-        QStringLiteral("oxygen"),
         QStringLiteral("fusion"),
+        QStringLiteral("breeze"),
+        QStringLiteral("oxygen"),
         QStringLiteral("windows")
     };
     const QString configuredStyle = cg.readEntry("widgetStyle", QString());
