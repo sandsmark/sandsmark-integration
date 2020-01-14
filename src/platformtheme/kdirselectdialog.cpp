@@ -54,7 +54,7 @@
 #include <kurlcompletion.h>
 #include <kurlpixmapprovider.h>
 #include <kfilewidget.h>
-#include <kfileutils.h>
+#include <KFileUtils>
 
 #include "kfiletreeview_p.h"
 #include <kfileplacesview.h>
@@ -295,11 +295,11 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     m_buttons->addButton(folderButton, QDialogButtonBox::ActionRole);
     m_buttons->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     connect(m_buttons, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(m_buttons, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(m_buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
     topLayout->addWidget(m_buttons);
 
     QHBoxLayout *hlay = new QHBoxLayout(page);
-    hlay->setMargin(0);
+    hlay->setContentsMargins(0, 0, 0, 0);
     QVBoxLayout *mainLayout = new QVBoxLayout();
     d->m_actions = new KActionCollection(this);
     d->m_actions->addAssociatedWidget(this);
@@ -308,8 +308,8 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     d->m_placesView->setObjectName(QStringLiteral("speedbar"));
     d->m_placesView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->m_placesView->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    connect(d->m_placesView, SIGNAL(urlChanged(QUrl)),
-            SLOT(setCurrentUrl(QUrl)));
+    connect(d->m_placesView, &KFilePlacesView::urlChanged,
+            this, &KDirSelectDialog::setCurrentUrl);
     hlay->addWidget(d->m_placesView);
     hlay->addLayout(mainLayout);
 
@@ -360,7 +360,7 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     d->showHiddenFoldersAction = new KToggleAction(i18nc("@option:check", "Show Hidden Folders"), this);
     d->m_actions->addAction(d->showHiddenFoldersAction->objectName(), d->showHiddenFoldersAction);
     d->showHiddenFoldersAction->setShortcut(Qt::Key_F8);
-    connect(d->showHiddenFoldersAction, SIGNAL(triggered(bool)), d->m_treeView, SLOT(setShowHiddenFiles(bool)));
+    connect(d->showHiddenFoldersAction, &QAction::triggered, d->m_treeView, &KFileTreeView::setShowHiddenFiles);
     d->m_contextMenu->addAction(d->showHiddenFoldersAction);
     d->m_contextMenu->addSeparator();
 

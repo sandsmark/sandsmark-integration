@@ -108,18 +108,16 @@ void SystemTrayMenu::removeMenuItem(QPlatformMenuItem *menuItem)
 
 void SystemTrayMenu::setEnabled(bool enabled)
 {
-    if (!m_menu) {
-        return;
+    if (m_menu) {
+        m_menu->setEnabled(enabled);
     }
-    m_menu->setEnabled(enabled);
 }
 
 void SystemTrayMenu::setIcon(const QIcon &icon)
 {
-    if (!m_menu) {
-        return;
+    if (m_menu) {
+        m_menu->setIcon(icon);
     }
-    m_menu->setIcon(icon);
 }
 
 void SystemTrayMenu::setTag(quintptr tag)
@@ -129,18 +127,16 @@ void SystemTrayMenu::setTag(quintptr tag)
 
 void SystemTrayMenu::setText(const QString &text)
 {
-    if (!m_menu) {
-        return;
+    if (m_menu) {
+        m_menu->setTitle(text);
     }
-    m_menu->setTitle(text);
 }
 
 void SystemTrayMenu::setVisible(bool visible)
 {
-    if (!m_menu) {
-        return;
+    if (m_menu) {
+        m_menu->setVisible(visible);
     }
-    m_menu->setVisible(visible);
 }
 
 void SystemTrayMenu::syncMenuItem(QPlatformMenuItem *menuItem)
@@ -151,10 +147,9 @@ void SystemTrayMenu::syncMenuItem(QPlatformMenuItem *menuItem)
 
 void SystemTrayMenu::syncSeparatorsCollapsible(bool enable)
 {
-    if (!m_menu) {
-        return;
+    if (m_menu) {
+        m_menu->setSeparatorsCollapsible(enable);
     }
-    m_menu->setSeparatorsCollapsible(enable);
 }
 
 quintptr SystemTrayMenu::tag() const
@@ -244,7 +239,7 @@ void SystemTrayMenuItem::setVisible(bool isVisible)
 
 void SystemTrayMenuItem::setIconSize(int size)
 {
-    Q_UNUSED(size);
+    Q_UNUSED(size)
 }
 
 void SystemTrayMenuItem::setHasExclusiveGroup(bool hasExclusiveGroup)

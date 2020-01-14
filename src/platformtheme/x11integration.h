@@ -28,7 +28,7 @@ class X11Integration : public QObject
     Q_OBJECT
 public:
     explicit X11Integration();
-    virtual ~X11Integration();
+    ~X11Integration() override;
     void init();
 
     bool eventFilter(QObject *watched, QEvent *event) override;

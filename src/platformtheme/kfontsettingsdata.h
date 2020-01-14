@@ -52,13 +52,14 @@ public:
 
 public:
     KFontSettingsData();
-    ~KFontSettingsData();
+    ~KFontSettingsData() override;
 
 public Q_SLOTS:
     void dropFontSettingsCache();
 
 private Q_SLOTS:
     void delayedDBusConnects();
+
 
 public: // access, is not const due to caching
     QFont *font(FontTypes fontType);

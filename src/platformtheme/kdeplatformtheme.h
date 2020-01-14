@@ -37,11 +37,12 @@ class KdePlatformTheme : public QPlatformTheme
 {
 public:
     KdePlatformTheme();
-    ~KdePlatformTheme();
+    ~KdePlatformTheme() override;
 
     QVariant themeHint(ThemeHint hint) const override;
     QIcon fileIcon(const QFileInfo &fileInfo,
                            QPlatformTheme::IconOptions iconOptions) const override;
+
     const QPalette *palette(Palette type = SystemPalette) const override;
     const QFont *font(Font type) const override;
     QIconEngine *createIconEngine(const QString &iconName) const override;
@@ -53,6 +54,7 @@ public:
     QString standardButtonText(int button) const override;
 
     QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override;
+
     QPlatformMenuBar *createPlatformMenuBar() const override;
 
 private:

@@ -27,20 +27,18 @@
 #include <kfilewidget.h>
 #include <klocalizedstring.h>
 #include <kdiroperator.h>
-#include <KUrlComboBox>
 #include <KSharedConfig>
 #include <KWindowConfig>
 #include <KProtocolInfo>
-#include <QMimeDatabase>
 #include <kio_version.h>
 #include <KIO/StatJob>
 #include <KJobWidgets>
 
+#include <QMimeDatabase>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QWindow>
-
 #include <QTextStream>
 
 namespace
@@ -101,21 +99,21 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     , m_fileWidget(new KFileWidget(QUrl(), this))
 {
     setLayout(new QVBoxLayout);
-    connect(m_fileWidget, SIGNAL(filterChanged(QString)), SIGNAL(filterSelected(QString)));
+    connect(m_fileWidget, &KFileWidget::filterChanged, this, &KDEPlatformFileDialogBase::filterSelected);
     layout()->addWidget(m_fileWidget);
 
     m_buttons = new QDialogButtonBox(this);
     m_buttons->addButton(m_fileWidget->okButton(), QDialogButtonBox::AcceptRole);
     m_buttons->addButton(m_fileWidget->cancelButton(), QDialogButtonBox::RejectRole);
-    connect(m_buttons, SIGNAL(rejected()), m_fileWidget, SLOT(slotCancel()));
+    connect(m_buttons, &QDialogButtonBox::rejected, m_fileWidget, &KFileWidget::slotCancel);
     // Also call the cancel function when the dialog is closed via the escape key
     // or titlebar close button to make sure we always save the view config
     connect(this, &KDEPlatformFileDialog::rejected,
             m_fileWidget, &KFileWidget::slotCancel);
-    connect(m_fileWidget->okButton(), SIGNAL(clicked(bool)), m_fileWidget, SLOT(slotOk()));
-    connect(m_fileWidget, SIGNAL(accepted()), m_fileWidget, SLOT(accept()));
-    connect(m_fileWidget, SIGNAL(accepted()), SLOT(accept()));
-    connect(m_fileWidget->cancelButton(), SIGNAL(clicked(bool)), SLOT(reject()));
+    connect(m_fileWidget->okButton(), &QAbstractButton::clicked, m_fileWidget, &KFileWidget::slotOk);
+    connect(m_fileWidget, &KFileWidget::accepted, m_fileWidget, &KFileWidget::accept);
+    connect(m_fileWidget, &KFileWidget::accepted, this, &QDialog::accept);
+    connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
     layout()->addWidget(m_buttons);
 }
@@ -259,15 +257,15 @@ KDEPlatformFileDialogHelper::KDEPlatformFileDialogHelper()
     : QPlatformFileDialogHelper()
     , m_dialog(new KDEPlatformFileDialog)
 {
-    connect(m_dialog, SIGNAL(closed()), SLOT(saveSize()));
-    connect(m_dialog, SIGNAL(finished(int)), SLOT(saveSize()));
-    connect(m_dialog, SIGNAL(currentChanged(QUrl)), SIGNAL(currentChanged(QUrl)));
-    connect(m_dialog, SIGNAL(directoryEntered(QUrl)), SIGNAL(directoryEntered(QUrl)));
-    connect(m_dialog, SIGNAL(fileSelected(QUrl)), SIGNAL(fileSelected(QUrl)));
-    connect(m_dialog, SIGNAL(filesSelected(QList<QUrl>)), SIGNAL(filesSelected(QList<QUrl>)));
-    connect(m_dialog, SIGNAL(filterSelected(QString)), SIGNAL(filterSelected(QString)));
-    connect(m_dialog, SIGNAL(accepted()), SIGNAL(accept()));
-    connect(m_dialog, SIGNAL(rejected()), SIGNAL(reject()));
+    connect(m_dialog, &KDEPlatformFileDialogBase::closed, this, &KDEPlatformFileDialogHelper::saveSize);
+    connect(m_dialog, &QDialog::finished, this, &KDEPlatformFileDialogHelper::saveSize);
+    connect(m_dialog, &KDEPlatformFileDialogBase::currentChanged, this, &QPlatformFileDialogHelper::currentChanged);
+    connect(m_dialog, &KDEPlatformFileDialogBase::directoryEntered, this, &QPlatformFileDialogHelper::directoryEntered);
+    connect(m_dialog, &KDEPlatformFileDialogBase::fileSelected, this, &QPlatformFileDialogHelper::fileSelected);
+    connect(m_dialog, &KDEPlatformFileDialogBase::filesSelected, this, &QPlatformFileDialogHelper::filesSelected);
+    connect(m_dialog, &KDEPlatformFileDialogBase::filterSelected, this, &QPlatformFileDialogHelper::filterSelected);
+    connect(m_dialog, &QDialog::accepted, this, &QPlatformDialogHelper::accept);
+    connect(m_dialog, &QDialog::rejected, this, &QPlatformDialogHelper::reject);
 }
 
 KDEPlatformFileDialogHelper::~KDEPlatformFileDialogHelper()
@@ -282,8 +280,8 @@ void KDEPlatformFileDialogHelper::initializeDialog()
     if (options()->testOption(QFileDialogOptions::ShowDirsOnly)) {
         m_dialog->deleteLater();
         m_dialog = new KDirSelectDialog(options()->initialDirectory());
-        connect(m_dialog, SIGNAL(accepted()), SIGNAL(accept()));
-        connect(m_dialog, SIGNAL(rejected()), SIGNAL(reject()));
+        connect(m_dialog, &QDialog::accepted, this, &QPlatformDialogHelper::accept);
+        connect(m_dialog, &QDialog::rejected, this, &QPlatformDialogHelper::reject);
         if (!options()->windowTitle().isEmpty())
             m_dialog->setWindowTitle(options()->windowTitle());
     } else {
@@ -315,9 +313,7 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         if (!mimeFilters.isEmpty()) {
             QString defaultMimeFilter;
             if (options()->acceptMode() == QFileDialogOptions::AcceptSave) {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
                 defaultMimeFilter = options()->initiallySelectedMimeTypeFilter();
-#endif
                 if (defaultMimeFilter.isEmpty()) {
                     defaultMimeFilter = mimeFilters.at(0);
                 }
@@ -406,7 +402,6 @@ QList<QUrl> KDEPlatformFileDialogHelper::selectedFiles() const
     return m_dialog->selectedFiles();
 }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 9, 0)
 QString KDEPlatformFileDialogHelper::selectedMimeTypeFilter() const
 {
     return m_dialog->selectedMimeTypeFilter();
@@ -416,7 +411,6 @@ void KDEPlatformFileDialogHelper::selectMimeTypeFilter(const QString &filter)
 {
     m_dialog->selectMimeTypeFilter(filter);
 }
-#endif
 
 QString KDEPlatformFileDialogHelper::selectedNameFilter() const
 {
@@ -430,7 +424,7 @@ QUrl KDEPlatformFileDialogHelper::directory() const
 
 void KDEPlatformFileDialogHelper::selectFile(const QUrl &filename)
 {
-    // This is called once by QFileDialogPrivate::init -> QFileDialog::selectUrl -> QFileDialogPrivate::selectFil  e_sys
+    // This is called once by QFileDialogPrivate::init -> QFileDialog::selectUrl -> QFileDialogPrivate::selectFile_sys
     // and then again by selectFile in the QFileDialog constructor, with a wrong value for remote URLs, until the   Qt 5.11.2 fix.
 #if QT_VERSION < QT_VERSION_CHECK(5, 12, 0)
     if (m_fileSelected && !m_dialogInitialized) {
