@@ -19,7 +19,6 @@ set(platformtheme_SRCS
     kdeplatformsystemtrayicon.cpp
     kfiletreeview.cpp
     kdirselectdialog.cpp
-    kwaylandintegration.cpp
     x11integration.cpp
     main.cpp
 )
@@ -42,7 +41,6 @@ target_link_libraries(SandsmarkPlatformTheme
         KF5::I18n
         KF5::Notifications
         KF5::WindowSystem
-        KF5::WaylandClient
         ${QT5PLATFORMSUPPORT_LIBS}
 
 )

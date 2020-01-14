@@ -27,7 +27,6 @@
 #include "khintssettings.h"
 #include "kdeplatformfiledialoghelper.h"
 #include "kdeplatformsystemtrayicon.h"
-#include "kwaylandintegration.h"
 #include "x11integration.h"
 
 #include <QApplication>
@@ -52,10 +51,7 @@ KdePlatformTheme::KdePlatformTheme()
 {
     qDebug() << "Hello";
     loadSettings();
-    if (QGuiApplication::platformName().startsWith(QLatin1String("wayland"))) {
-        m_kwaylandIntegration.reset(new KWaylandIntegration());
-        m_kwaylandIntegration->init();
-    } else if (QX11Info::isPlatformX11()) {
+    if (QX11Info::isPlatformX11()) {
         m_x11Integration.reset(new X11Integration());
         m_x11Integration->init();
     }

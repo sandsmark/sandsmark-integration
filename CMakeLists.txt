@@ -36,7 +36,6 @@ find_package(KF5 REQUIRED
     Notifications
     WidgetsAddons
     WindowSystem
-    Wayland
     )
 
 add_definitions(-DTRANSLATION_DOMAIN=\"sandsmarkintegration5\")
