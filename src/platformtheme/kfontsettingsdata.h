@@ -65,6 +65,8 @@ public: // access, is not const due to caching
     QFont *font(FontTypes fontType);
 
 private:
+    QString readConfigValue(const QString &group, const QString &key, const QString &defaultValue = QString()) const;
+
     QFont *mFonts[FontTypesCount];
     KSharedConfigPtr mKdeGlobals;
 };

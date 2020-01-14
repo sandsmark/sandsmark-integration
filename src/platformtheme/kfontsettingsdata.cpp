@@ -71,8 +71,7 @@ QFont *KFontSettingsData::font(FontTypes fontType)
         cachedFont = new QFont(QLatin1String(fontData.FontName), fontData.Size, fontData.Weight);
         cachedFont->setStyleHint(fontData.StyleHint);
 
-        const KConfigGroup configGroup(mKdeGlobals, fontData.ConfigGroupKey);
-        QString fontInfo = configGroup.readEntry(fontData.ConfigKey, QString());
+        const QString fontInfo = readConfigValue(QLatin1String(fontData.ConfigGroupKey), QLatin1String(fontData.ConfigKey));
 
         //If we have serialized information for this font, restore it
         //NOTE: We are not using KConfig directly because we can't call QFont::QFont from here
@@ -107,4 +106,10 @@ void KFontSettingsData::delayedDBusConnects()
 {
     QDBusConnection::sessionBus().connect(QString(), QStringLiteral("/KDEPlatformTheme"), QStringLiteral("org.kde.KDEPlatformTheme"),
                                           QStringLiteral("refreshFonts"), this, SLOT(dropFontSettingsCache()));
+}
+
+QString KFontSettingsData::readConfigValue(const QString &group, const QString &key, const QString &defaultValue) const
+{
+    const KConfigGroup configGroup(mKdeGlobals, group);
+    return configGroup.readEntry(key, defaultValue);
 }
