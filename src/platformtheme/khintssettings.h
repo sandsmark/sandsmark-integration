@@ -52,7 +52,7 @@ public:
                             SETTINGS_LOCALE, SETTINGS_STYLE
                           };
     explicit KHintsSettings(KSharedConfig::Ptr kdeglobals = KSharedConfig::Ptr());
-    virtual ~KHintsSettings();
+    ~KHintsSettings() override;
 
     inline QVariant hint(QPlatformTheme::ThemeHint hint) const
     {
@@ -73,11 +73,12 @@ private Q_SLOTS:
 
 private:
     QVariant readConfigValue(const QString &group, const QString &key, const QVariant &defaultValue);
+    QVariant readConfigValue(const KConfigGroup &cg, const QString &key, const QVariant &defaultValue) const;
     void loadPalettes();
     void iconChanged(int group);
     void updateQtSettings(KConfigGroup &cg);
     void updateShowIconsInMenuItems(KConfigGroup &cg);
-    Qt::ToolButtonStyle toolButtonStyle(const KConfigGroup &cg) const;
+    Qt::ToolButtonStyle toolButtonStyle(const KConfigGroup &cg);
     void updateCursorTheme();
 
     QHash<QPlatformTheme::Palette, QPalette *> m_palettes;

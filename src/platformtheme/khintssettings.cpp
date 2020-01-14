@@ -66,25 +66,25 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
     KConfigGroup cg(mKdeGlobals, "KDE");
 
     // try to extract the proper defaults file from a lookandfeel package
-    const QString looknfeel = cg.readEntry("LookAndFeelPackage", defaultLookAndFeelPackage);
-    mDefaultLnfConfig = KSharedConfig::openConfig(QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + looknfeel + QStringLiteral("/contents/defaults")));
+    const QString looknfeel = readConfigValue(cg, QStringLiteral("LookAndFeelPackage"), defaultLookAndFeelPackage).toString();
+    mDefaultLnfConfig = KSharedConfig::openConfig(QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + defaultLookAndFeelPackage + QStringLiteral("/contents/defaults")));
     if (looknfeel != defaultLookAndFeelPackage) {
-        mLnfConfig = KSharedConfig::openConfig(QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + defaultLookAndFeelPackage + QStringLiteral("/contents/defaults")));
+        mLnfConfig = KSharedConfig::openConfig(QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + looknfeel + QStringLiteral("/contents/defaults")));
     }
 
-
-    m_hints[QPlatformTheme::CursorFlashTime] = qBound(200, cg.readEntry("CursorBlinkRate", 1000), 2000);
-    m_hints[QPlatformTheme::MouseDoubleClickInterval] = cg.readEntry("DoubleClickInterval", 400);
-    m_hints[QPlatformTheme::StartDragDistance] = cg.readEntry("StartDragDist", 10);
-    m_hints[QPlatformTheme::StartDragTime] = cg.readEntry("StartDragTime", 500);
+    const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), 1000).toInt();
+    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : 0; // 0 => no blinking
+    m_hints[QPlatformTheme::MouseDoubleClickInterval] = readConfigValue(cg, QStringLiteral("DoubleClickInterval"), 400);
+    m_hints[QPlatformTheme::StartDragDistance] = readConfigValue(cg, QStringLiteral("StartDragDist"), 10);
+    m_hints[QPlatformTheme::StartDragTime] = readConfigValue(cg, QStringLiteral("StartDragTime"), 500);
 
     KConfigGroup cgToolbar(mKdeGlobals, "Toolbar style");
     m_hints[QPlatformTheme::ToolButtonStyle] = toolButtonStyle(cgToolbar);
 
     KConfigGroup cgToolbarIcon(mKdeGlobals, "MainToolbarIcons");
-    m_hints[QPlatformTheme::ToolBarIconSize] = cgToolbarIcon.readEntry("Size", 22);
+    m_hints[QPlatformTheme::ToolBarIconSize] = readConfigValue(cgToolbarIcon, QStringLiteral("Size"), 22);
 
-    m_hints[QPlatformTheme::ItemViewActivateItemOnSingleClick] = cg.readEntry("SingleClick", true);
+    m_hints[QPlatformTheme::ItemViewActivateItemOnSingleClick] = readConfigValue(cg, QStringLiteral("SingleClick"), true);
 
     m_hints[QPlatformTheme::SystemIconThemeName] = readConfigValue(QStringLiteral("Icons"), QStringLiteral("Theme"), QStringLiteral("breeze"));
 
@@ -98,7 +98,7 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
         QStringLiteral("oxygen"),
         QStringLiteral("windows")
     };
-    const QString configuredStyle = cg.readEntry("widgetStyle", QString());
+    const QString configuredStyle = readConfigValue(cg, QStringLiteral("widgetStyle"), QString()).toString();
     if (!configuredStyle.isEmpty()) {
         styleNames.removeOne(configuredStyle);
         styleNames.prepend(configuredStyle);
@@ -111,15 +111,15 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
     m_hints[QPlatformTheme::StyleNames] = styleNames;
 
     m_hints[QPlatformTheme::DialogButtonBoxLayout] = QDialogButtonBox::KdeLayout;
-    m_hints[QPlatformTheme::DialogButtonBoxButtonsHaveIcons] = cg.readEntry("ShowIconsOnPushButtons", true);
+    m_hints[QPlatformTheme::DialogButtonBoxButtonsHaveIcons] = readConfigValue(cg, QStringLiteral("ShowIconsOnPushButtons"), true);
     m_hints[QPlatformTheme::UseFullScreenForPopupMenu] = true;
     m_hints[QPlatformTheme::KeyboardScheme] = QPlatformTheme::KdeKeyboardScheme;
-    m_hints[QPlatformTheme::UiEffects] = cg.readEntry("GraphicEffectsLevel", 0) != 0 ? QPlatformTheme::GeneralUiEffect : 0;
+    m_hints[QPlatformTheme::UiEffects] = readConfigValue(cg, QStringLiteral("GraphicEffectsLevel"), 0) != 0 ? QPlatformTheme::GeneralUiEffect : 0;
     m_hints[QPlatformTheme::IconPixmapSizes] = QVariant::fromValue(QList<int>() << 512 << 256 << 128 << 64 << 32 << 22 << 16 << 8);
 
-    m_hints[QPlatformTheme::WheelScrollLines] = cg.readEntry("WheelScrollLines", 3);
+    m_hints[QPlatformTheme::WheelScrollLines] = readConfigValue(cg, QStringLiteral("WheelScrollLines"), 3);
     if (qobject_cast<QApplication *>(QCoreApplication::instance())) {
-        QApplication::setWheelScrollLines(cg.readEntry("WheelScrollLines", 3));
+        QApplication::setWheelScrollLines(readConfigValue(cg, QStringLiteral("WheelScrollLines"), 3).toInt());
     }
 
     updateShowIconsInMenuItems(cg);
@@ -140,7 +140,7 @@ KHintsSettings::~KHintsSettings()
 QVariant KHintsSettings::readConfigValue(const QString &group, const QString &key, const QVariant &defaultValue)
 {
     KConfigGroup userCg(mKdeGlobals, group);
-    QVariant value = userCg.readEntry(key, QString());
+    QVariant value = readConfigValue(userCg, key, QString());
 
     if (!value.isNull()) {
         return value;
@@ -167,10 +167,16 @@ QVariant KHintsSettings::readConfigValue(const QString &group, const QString &ke
     return defaultValue;
 }
 
+QVariant KHintsSettings::readConfigValue(const KConfigGroup &cg, const QString &key, const QVariant &defaultValue) const
+{
+    return cg.readEntry(key, defaultValue);
+}
+
 QStringList KHintsSettings::xdgIconThemePaths() const
 {
     QStringList paths;
 
+    // make sure we have ~/.local/share/icons in paths if it exists
     paths << QStandardPaths::locateAll(QStandardPaths::GenericDataLocation, QStringLiteral("icons"), QStandardPaths::LocateDirectory);
 
     const QFileInfo homeIconDir(QDir::homePath() + QStringLiteral("/.icons"));
@@ -218,12 +224,21 @@ void KHintsSettings::slotNotifyChange(int type, int arg)
 
     switch (type) {
     case PaletteChanged: {
+        // Don't change the palette if the application has a custom one set
+        if (!qApp->property("KDE_COLOR_SCHEME_PATH").toString().isEmpty()) {
+            break;
+        }
         loadPalettes();
 
         //QApplication::setPalette and QGuiApplication::setPalette are different functions
         //and non virtual. Call the correct one
         if (qobject_cast<QApplication *>(QCoreApplication::instance())) {
-            QApplication::setPalette(*m_palettes[QPlatformTheme::SystemPalette]);
+            QPalette palette = *m_palettes[QPlatformTheme::SystemPalette];
+            QApplication::setPalette(palette);
+            // QTBUG QGuiApplication::paletteChanged() signal is only emitted by QGuiApplication
+            // so things like SystemPalette QtQuick item that use it won't notice a palette
+            // change when a QApplication which causes e.g. QML System Settings modules to not update
+            emit qApp->paletteChanged(palette);
         } else if (qobject_cast<QGuiApplication *>(QCoreApplication::instance())) {
             QGuiApplication::setPalette(*m_palettes[QPlatformTheme::SystemPalette]);
         }
@@ -290,7 +305,6 @@ void KHintsSettings::iconChanged(int group)
     KIconLoader::Group iconGroup = (KIconLoader::Group) group;
     if (iconGroup != KIconLoader::MainToolbar) {
         m_hints[QPlatformTheme::SystemIconThemeName] = readConfigValue(QStringLiteral("Icons"), QStringLiteral("Theme"), QStringLiteral("breeze"));
-
         return;
     }
 
@@ -343,13 +357,13 @@ void KHintsSettings::updateQtSettings(KConfigGroup &cg)
 
 void KHintsSettings::updateShowIconsInMenuItems(KConfigGroup &cg)
 {
-    bool showIcons = cg.readEntry("ShowIconsInMenuItems", true);
+    bool showIcons = readConfigValue(cg, QStringLiteral("ShowIconsInMenuItems"), true).toBool();
     QCoreApplication::setAttribute(Qt::AA_DontShowIconsInMenus, !showIcons);
 }
 
-Qt::ToolButtonStyle KHintsSettings::toolButtonStyle(const KConfigGroup &cg) const
+Qt::ToolButtonStyle KHintsSettings::toolButtonStyle(const KConfigGroup &cg)
 {
-    const QString buttonStyle = cg.readEntry("ToolButtonStyle", "TextBesideIcon").toLower();
+    const QString buttonStyle = readConfigValue(cg, QStringLiteral("ToolButtonStyle"), QStringLiteral("TextBesideIcon")).toString().toLower();
     return buttonStyle == QLatin1String("textbesideicon") ? Qt::ToolButtonTextBesideIcon
            : buttonStyle == QLatin1String("icontextright") ? Qt::ToolButtonTextBesideIcon
            : buttonStyle == QLatin1String("textundericon") ? Qt::ToolButtonTextUnderIcon
@@ -366,9 +380,8 @@ void KHintsSettings::loadPalettes()
     if (mKdeGlobals->hasGroup("Colors:View")) {
         m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(mKdeGlobals));
     } else {
-
         KConfigGroup cg(mKdeGlobals, "KDE");
-        const QString looknfeel = cg.readEntry("LookAndFeelPackage", defaultLookAndFeelPackage);
+        const QString looknfeel = readConfigValue(cg, QStringLiteral("LookAndFeelPackage"), defaultLookAndFeelPackage).toString();
         QString path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + looknfeel + QStringLiteral("/contents/colors"));
         if (!path.isEmpty()) {
             m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(KSharedConfig::openConfig(path)));
