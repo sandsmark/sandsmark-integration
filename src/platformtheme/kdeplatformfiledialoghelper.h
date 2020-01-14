@@ -43,6 +43,7 @@ public:
     void setCustomLabel(QFileDialogOptions::DialogLabel label, const QString & text);
     QString selectedMimeTypeFilter() override;
     QString selectedNameFilter() override;
+    QString currentFilterText() override;
     QList<QUrl> selectedFiles() override;
 
 protected:
@@ -54,7 +55,7 @@ class KDEPlatformFileDialogHelper : public QPlatformFileDialogHelper
     Q_OBJECT
 public:
     KDEPlatformFileDialogHelper();
-    virtual ~KDEPlatformFileDialogHelper();
+    ~KDEPlatformFileDialogHelper() override;
 
     void initializeDialog();
 

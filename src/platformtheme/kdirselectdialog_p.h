@@ -50,7 +50,7 @@ public:
     /**
      * Destroys the directory selection dialog.
      */
-    ~KDirSelectDialog();
+    ~KDirSelectDialog() override;
 
     /**
      * Returns the currently selected URL, or an empty one if no item is selected.
@@ -104,6 +104,7 @@ public:
     void selectFile(const QUrl &filename) override;
     QString selectedMimeTypeFilter() override;
     QString selectedNameFilter() override;
+    QString currentFilterText() override;
     QList<QUrl> selectedFiles() override;
 
 public Q_SLOTS:
