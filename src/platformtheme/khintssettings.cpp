@@ -233,6 +233,10 @@ void KHintsSettings::slotNotifyChange(int type, int arg)
         //QApplication::setPalette and QGuiApplication::setPalette are different functions
         //and non virtual. Call the correct one
         if (qobject_cast<QApplication *>(QCoreApplication::instance())) {
+            if (!m_palettes.contains(QPlatformTheme::SystemPalette)) {
+                qWarning() << "Missing system palette!" << type << arg;
+                return;
+            }
             QPalette palette = *m_palettes[QPlatformTheme::SystemPalette];
             QApplication::setPalette(palette);
             // QTBUG QGuiApplication::paletteChanged() signal is only emitted by QGuiApplication
