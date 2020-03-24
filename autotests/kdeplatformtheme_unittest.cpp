@@ -152,7 +152,7 @@ private Q_SLOTS:
         QVERIFY(!iconThemeSearchPaths.isEmpty());
 
         QStringList styles;
-        styles << QStringLiteral("non-existent-widget-style") << QStringLiteral(BREEZE_STYLE_NAME) << QStringLiteral("oxygen") << QStringLiteral("fusion") << QStringLiteral("windows");
+        styles << QStringLiteral("non-existent-widget-style") << QStringLiteral("sandsmarkstyle") << QStringLiteral("fusion") << QStringLiteral("breeze") << QStringLiteral("oxygen") << QStringLiteral("windows");
         QCOMPARE(m_qpa->themeHint(QPlatformTheme::StyleNames).toStringList(), styles);
         QCOMPARE(m_qpa->themeHint(QPlatformTheme::DialogButtonBoxLayout).toInt(), (int) QDialogButtonBox::KdeLayout);
         QCOMPARE(m_qpa->themeHint(QPlatformTheme::DialogButtonBoxButtonsHaveIcons).toBool(), false);
@@ -258,7 +258,7 @@ private Q_SLOTS:
         m_loop.exec();
 
         QStringList styles;
-        styles << QStringLiteral("another-non-existent-widget-style") << QStringLiteral(BREEZE_STYLE_NAME) << QStringLiteral("oxygen") << QStringLiteral("fusion") << QStringLiteral("windows");
+        styles << QStringLiteral("another-non-existent-widget-style") << QStringLiteral("sandsmarkstyle") << QStringLiteral("fusion") << QStringLiteral("breeze") << QStringLiteral("oxygen") << QStringLiteral("windows");
         QCOMPARE(m_qpa->themeHint(QPlatformTheme::StyleNames).toStringList(), styles);
 
         sendNotifyChange(KHintsSettings::SettingsChanged, KHintsSettings::SETTINGS_STYLE);
