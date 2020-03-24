@@ -329,7 +329,6 @@ private:
                 widgets.append(fw);
             }
         }
-        Q_ASSERT(widgets.count() == 1);
         return (widgets.count() == 1) ? widgets.first() : nullptr;
     }
 
