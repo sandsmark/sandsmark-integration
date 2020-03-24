@@ -32,6 +32,7 @@ private Q_SLOTS:
     void initTestCase()
     {
         qputenv("KDE_FORK_SLAVES", "yes");
+        qApp->setQuitOnLastWindowClosed(false);
         m_engine = new QQmlEngine;
     }
 
