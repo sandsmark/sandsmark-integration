@@ -11,6 +11,8 @@ feature_summary(WHAT REQUIRED_PACKAGES_NOT_FOUND FATAL_ON_MISSING_REQUIRED_PACKA
 
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
+add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x060000)
+
 include(GenerateExportHeader)
 include(ECMPackageConfigHelpers)
 include(ECMSetupVersion)
