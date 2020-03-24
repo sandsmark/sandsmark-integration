@@ -38,6 +38,11 @@ private Q_SLOTS:
     void initTestCase()
     {
         qputenv("KDE_FORK_SLAVES", "yes");
+
+        // Without the QApplication running and with quit on last window closed
+        // we get really bad behavior when trying to use our file dialog,
+        // so force set this here because QTEST_MAIN does not start the qapplication
+        qApp->setQuitOnLastWindowClosed(false);
     }
 
     void cleanupTestCase()
