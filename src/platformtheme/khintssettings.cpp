@@ -284,10 +284,10 @@ void KHintsSettings::slotNotifyChange(int type, int arg)
 
         QStringList styleNames;
         styleNames << cg.readEntry("widgetStyle", QString())
-                << QStringLiteral("breeze")
                 << QStringLiteral("sandsmarkstyle")
-                << QStringLiteral("oxygen")
                 << QStringLiteral("fusion")
+                << QStringLiteral("breeze")
+                << QStringLiteral("oxygen")
                 << QStringLiteral("windows");
         const QString lnfStyle = readConfigValue(QStringLiteral("KDE"), QStringLiteral("widgetStyle"), QString()).toString();
         if (!lnfStyle.isEmpty() && !styleNames.contains(lnfStyle)) {
