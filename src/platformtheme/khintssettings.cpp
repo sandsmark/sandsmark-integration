@@ -383,22 +383,28 @@ void KHintsSettings::loadPalettes()
 
     if (mKdeGlobals->hasGroup("Colors:View")) {
         m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(mKdeGlobals));
-    } else {
-        KConfigGroup cg(mKdeGlobals, "KDE");
-        const QString looknfeel = readConfigValue(cg, QStringLiteral("LookAndFeelPackage"), defaultLookAndFeelPackage).toString();
-        QString path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + looknfeel + QStringLiteral("/contents/colors"));
-        if (!path.isEmpty()) {
-            m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(KSharedConfig::openConfig(path)));
-            return;
-        }
-
-        const QString scheme = readConfigValue(QStringLiteral("General"), QStringLiteral("ColorScheme"), QStringLiteral("Breeze")).toString();
-        path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("color-schemes/") + scheme + QStringLiteral(".colors"));
-
-        if (!path.isEmpty()) {
-            m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(KSharedConfig::openConfig(path)));
-        }
+        return;
     }
+
+    KConfigGroup cg(mKdeGlobals, "KDE");
+    const QString looknfeel = readConfigValue(cg, QStringLiteral("LookAndFeelPackage"), defaultLookAndFeelPackage).toString();
+    QString path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + looknfeel + QStringLiteral("/contents/colors"));
+    if (!path.isEmpty()) {
+        m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(KSharedConfig::openConfig(path)));
+        return;
+    }
+
+    const QString scheme = readConfigValue(QStringLiteral("General"), QStringLiteral("ColorScheme"), QStringLiteral("Breeze")).toString();
+    path = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("color-schemes/") + scheme + QStringLiteral(".colors"));
+
+    KSharedConfig::Ptr config = mKdeGlobals;
+
+    if (!path.isEmpty()) {
+        config = KSharedConfig::openConfig(path);
+        return;
+    }
+
+    m_palettes[QPlatformTheme::SystemPalette] = new QPalette(KColorScheme::createApplicationPalette(config));
 }
 
 void KHintsSettings::updateCursorTheme()
