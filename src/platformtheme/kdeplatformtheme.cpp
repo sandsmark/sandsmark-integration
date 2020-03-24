@@ -49,7 +49,6 @@
 
 KdePlatformTheme::KdePlatformTheme()
 {
-    qDebug() << "Hello";
     loadSettings();
     if (QX11Info::isPlatformX11()) {
         m_x11Integration.reset(new X11Integration());
