@@ -116,6 +116,10 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
     layout()->addWidget(m_buttons);
+
+    // KWindowConfig, which is used to restore the size,  uses the current size
+    // as hint, so set the suggested size here.
+    resize(m_fileWidget->dialogSizeHint());
 }
 
 QUrl KDEPlatformFileDialog::directory()
