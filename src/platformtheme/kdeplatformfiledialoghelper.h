@@ -50,7 +50,6 @@ private slots:
 
 protected:
     KFileWidget *m_fileWidget;
-    QUrl m_selectedUrl;
     bool m_selectingDir = false;
 };
 
