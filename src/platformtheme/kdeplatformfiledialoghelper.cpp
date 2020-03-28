@@ -41,6 +41,7 @@
 #include <QPushButton>
 #include <QWindow>
 #include <QTextStream>
+#include <KUrlComboBox>
 
 namespace
 {
@@ -115,6 +116,7 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(m_fileWidget->okButton(), &QAbstractButton::clicked, this, []() {
             qDebug() << "ok button clicked";
             });
+    connect(m_fileWidget->locationEdit(), SIGNAL(returnPressed()), this, SLOT(onAccepted()));
     connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onAccepted);
     //connect(m_fileWidget, &KFileWidget::accepted, m_fileWidget, &KFileWidget::accept);
     //connect(m_fileWidget, &KFileWidget::accepted, this, &QDialog::accept);
@@ -126,9 +128,7 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(m_fileWidget->dirOperator(), &KDirOperator::dirActivated, this, [=](const KFileItem &item) {
             qDebug() << "activated" << item;
     });
-    connect(m_fileWidget->dirOperator(), &KDirOperator::keyEnterReturnPressed, this, [=]() {
-            qDebug() << "Enter pressed";
-            });
+    connect(m_fileWidget->dirOperator(), &KDirOperator::keyEnterReturnPressed, this, &KDEPlatformFileDialog::onAccepted);
 
     connect(m_fileWidget->dirOperator(), &KDirOperator::fileSelected, this, [=](const KFileItem &item) {
             qDebug() << "selected" << item;
@@ -205,7 +205,7 @@ void KDEPlatformFileDialog::setFileMode(QFileDialogOptions::FileMode mode)
         m_fileWidget->setMode(KFile::Mode::File | KFile::Mode::ExistingOnly);
         break;
     case QFileDialogOptions::FileMode::Directory:
-        m_fileWidget->setMode(KFile::Mode::Directory | KFile::Mode::ExistingOnly);
+        m_selectingDir = true;
         break;
     case QFileDialogOptions::FileMode::ExistingFiles:
         m_fileWidget->setMode(KFile::Mode::Files | KFile::Mode::ExistingOnly);
@@ -268,7 +268,6 @@ void KDEPlatformFileDialog::selectNameFilter(const QString &filter)
 
 void KDEPlatformFileDialog::setDirectory(const QUrl &directory)
 {
-    qDebug() << "dialog setting directory" << directory;
     if (!directory.isLocalFile())  {
         // Qt can not determine if the remote URL points to a file or a
         // directory, that is why options()->initialDirectory() always returns
@@ -323,7 +322,6 @@ KDEPlatformFileDialogHelper::~KDEPlatformFileDialogHelper()
 void KDEPlatformFileDialogHelper::initializeDialog()
 {
     m_dialogInitialized = true;
-    qDebug() << "Initializing dialog";
 
     if (options()->testOption(QFileDialogOptions::ShowDirsOnly)) {
         m_dialog->deleteLater();
@@ -368,15 +366,15 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         }
         dialog->m_fileWidget->setMimeFilter(mimeFilters, defaultMimeFilter);
 
-        if ( mimeFilters.contains( QStringLiteral("inode/directory") ) )
-            dialog->m_fileWidget->setMode( dialog->m_fileWidget->mode() | KFile::Directory );
+        if ( mimeFilters.contains( QStringLiteral("inode/directory") ) ) {
+            dialog->m_selectingDir = true;
+        }
     } else if (!nameFilters.isEmpty()) {
         dialog->m_fileWidget->setFilter(qt2KdeFilter(nameFilters));
     }
 
     if (!m_directorySet) {
         if (options()->initialDirectory().isValid()) {
-            qDebug() << "Options has initial" << options()->initialDirectory();
             setDirectory(options()->initialDirectory());
         }
     }
@@ -474,7 +472,6 @@ QString KDEPlatformFileDialogHelper::selectedNameFilter() const
 
 QUrl KDEPlatformFileDialogHelper::directory() const
 {
-    qDebug() << "Requesting directory";
     return m_dialog->directory();
 }
 
@@ -488,7 +485,6 @@ void KDEPlatformFileDialogHelper::selectFile(const QUrl &filename)
 
 void KDEPlatformFileDialogHelper::setDirectory(const QUrl &directory)
 {
-    qDebug() << "helper setting directory";
     if (!directory.isEmpty()) {
         m_dialog->setDirectory(directory);
         m_directorySet = true;
