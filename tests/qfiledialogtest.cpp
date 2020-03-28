@@ -26,6 +26,7 @@
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
+    app.setQuitOnLastWindowClosed(false);
     app.setApplicationName(QStringLiteral("QFileDialogTest"));
     QCommandLineParser parser;
     parser.addHelpOption();
