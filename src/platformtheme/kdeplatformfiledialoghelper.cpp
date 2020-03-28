@@ -42,6 +42,7 @@
 #include <QWindow>
 #include <QTextStream>
 #include <KUrlComboBox>
+#include <QKeyEvent>
 
 namespace
 {
@@ -125,6 +126,9 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     // as hint, so set the suggested size here.
     resize(m_fileWidget->dialogSizeHint());
     m_fileWidget->okButton()->setFocusPolicy(Qt::NoFocus);
+
+    // To "fix" keyboard navigation
+    m_fileWidget->locationEdit()->installEventFilter(this);
 }
 
 void KDEPlatformFileDialog::onAccepted()
@@ -261,6 +265,25 @@ void KDEPlatformFileDialog::setDirectory(const QUrl &directory)
     }
 }
 
+bool KDEPlatformFileDialog::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() != QEvent::KeyPress) {
+        return false;
+    }
+
+    if (watched != m_fileWidget->locationEdit()) {
+        return false;
+    }
+
+    QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+    if (!keyEvent->modifiers() && keyEvent->key() == Qt::Key_Up) {
+        m_fileWidget->dirOperator()->setFocus(Qt::OtherFocusReason);
+        return true;
+    }
+
+    return false;
+}
+
 bool KDEPlatformFileDialogHelper::isSupportedUrl(const QUrl& url) const
 {
     return KProtocolInfo::protocols().contains(url.scheme());
@@ -303,6 +326,7 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         }
         return;
     }
+
 
     // needed for accessing m_fileWidget
     KDEPlatformFileDialog *dialog = qobject_cast<KDEPlatformFileDialog*>(m_dialog);
@@ -369,6 +393,14 @@ void KDEPlatformFileDialogHelper::initializeDialog()
 
     dialog->m_fileWidget->setSupportedSchemes(supportedSchemes);
     dialog->m_fileWidget->okButton()->setFocusPolicy(Qt::NoFocus);
+
+    // KFileWidget is dumb, I'm tempted to loop over all the children of the
+    // KFileWidget and remove the location edit from the focus chain completely
+    //for (QWidget *w = dialog->m_fileWidget->locationEdit()->previousInFocusChain(); w != dialog->m_fileWidget->locationEdit(); w = w->previousInFocusChain()) {
+    //    qDebug() << w;
+    //}
+    //dialog->m_fileWidget->locationEdit()->previousInFocusChain()->setFocusPolicy(Qt::NoFocus);
+    //QWidget::setTabOrder(dialog->m_fileWidget->locationEdit(), dialog->m_fileWidget->dirOperator());
 }
 
 void KDEPlatformFileDialogHelper::exec()
