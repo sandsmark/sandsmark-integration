@@ -34,6 +34,7 @@
 #include <KIO/StatJob>
 #include <KJobWidgets>
 
+#include <QDebug>
 #include <QMimeDatabase>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
@@ -111,15 +112,55 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(this, &KDEPlatformFileDialog::rejected,
             m_fileWidget, &KFileWidget::slotCancel);
     connect(m_fileWidget->okButton(), &QAbstractButton::clicked, m_fileWidget, &KFileWidget::slotOk);
-    connect(m_fileWidget, &KFileWidget::accepted, m_fileWidget, &KFileWidget::accept);
-    connect(m_fileWidget, &KFileWidget::accepted, this, &QDialog::accept);
+    connect(m_fileWidget->okButton(), &QAbstractButton::clicked, this, []() {
+            qDebug() << "ok button clicked";
+            });
+    connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onAccepted);
+    //connect(m_fileWidget, &KFileWidget::accepted, m_fileWidget, &KFileWidget::accept);
+    //connect(m_fileWidget, &KFileWidget::accepted, this, &QDialog::accept);
     connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
+    //disconnect(m_fileWidget->dirOperator(), &KDirOperator::keyEnterReturnPressed, m_fileWidget, nullptr);
     layout()->addWidget(m_buttons);
+
+    connect(m_fileWidget->dirOperator(), &KDirOperator::dirActivated, this, [=](const KFileItem &item) {
+            qDebug() << "activated" << item;
+    });
+    connect(m_fileWidget->dirOperator(), &KDirOperator::keyEnterReturnPressed, this, [=]() {
+            qDebug() << "Enter pressed";
+            });
+
+    connect(m_fileWidget->dirOperator(), &KDirOperator::fileSelected, this, [=](const KFileItem &item) {
+            qDebug() << "selected" << item;
+    });
+    connect(m_fileWidget->dirOperator(), &KDirOperator::fileHighlighted, this, [=](const KFileItem &item) {
+            if (!item.isNull()) {
+                this->m_selectedUrl = item.url();
+            }
+
+        qDebug() << "highlighted" << item;
+    });
 
     // KWindowConfig, which is used to restore the size,  uses the current size
     // as hint, so set the suggested size here.
     resize(m_fileWidget->dialogSizeHint());
+    m_fileWidget->okButton()->setFocusPolicy(Qt::NoFocus);
+}
+
+void KDEPlatformFileDialog::onAccepted()
+{
+    qDebug() << "Accepted";
+    if ((m_fileWidget->mode() & KFile::Mode::Directory) && m_selectedUrl != m_fileWidget->baseUrl()) {
+        qWarning() << "Trying to accept directory without selecting a directory";
+        return;
+    }
+    qDebug() << "dir operator selected items" << m_fileWidget->dirOperator()->url();
+    qDebug() << "accept selected directory:" << m_fileWidget->baseUrl() << "selection"<< m_selectedUrl;
+    //qDebug() << "dir operator URL" << m_fileWidget->dirOperator()->url();
+    //qDebug() << "ebfore" << m_fileWidget->selectedUrls() << m_fileWidget->baseUrl();
+    m_fileWidget->accept();
+    //qDebug() << m_fileWidget->selectedUrls() << m_fileWidget->baseUrl();
+    QDialog::accept();
 }
 
 QUrl KDEPlatformFileDialog::directory()
@@ -227,6 +268,7 @@ void KDEPlatformFileDialog::selectNameFilter(const QString &filter)
 
 void KDEPlatformFileDialog::setDirectory(const QUrl &directory)
 {
+    qDebug() << "dialog setting directory" << directory;
     if (!directory.isLocalFile())  {
         // Qt can not determine if the remote URL points to a file or a
         // directory, that is why options()->initialDirectory() always returns
@@ -281,14 +323,16 @@ KDEPlatformFileDialogHelper::~KDEPlatformFileDialogHelper()
 void KDEPlatformFileDialogHelper::initializeDialog()
 {
     m_dialogInitialized = true;
+    qDebug() << "Initializing dialog";
 
     if (options()->testOption(QFileDialogOptions::ShowDirsOnly)) {
         m_dialog->deleteLater();
         m_dialog = new KDirSelectDialog(options()->initialDirectory());
         connect(m_dialog, &QDialog::accepted, this, &QPlatformDialogHelper::accept);
         connect(m_dialog, &QDialog::rejected, this, &QPlatformDialogHelper::reject);
-        if (!options()->windowTitle().isEmpty())
+        if (!options()->windowTitle().isEmpty()) {
             m_dialog->setWindowTitle(options()->windowTitle());
+        }
         return;
     }
 
@@ -299,9 +343,6 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         dialog->setWindowTitle(options()->acceptMode() == QFileDialogOptions::AcceptOpen ? i18nc("@title:window", "Open File") : i18nc("@title:window", "Save File"));
     } else {
         dialog->setWindowTitle(options()->windowTitle());
-    }
-    if (!m_directorySet) {
-        setDirectory(options()->initialDirectory());
     }
     //dialog->setViewMode(options()->viewMode()); // don't override our options, fixes remembering the chosen view mode and sizes!
     dialog->setFileMode(options()->fileMode());
@@ -333,6 +374,13 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         dialog->m_fileWidget->setFilter(qt2KdeFilter(nameFilters));
     }
 
+    if (!m_directorySet) {
+        if (options()->initialDirectory().isValid()) {
+            qDebug() << "Options has initial" << options()->initialDirectory();
+            setDirectory(options()->initialDirectory());
+        }
+    }
+
     if (!options()->initiallySelectedMimeTypeFilter().isEmpty()) {
         selectMimeTypeFilter(options()->initiallySelectedMimeTypeFilter());
     } else if (!options()->initiallySelectedNameFilter().isEmpty()) {
@@ -352,6 +400,7 @@ void KDEPlatformFileDialogHelper::initializeDialog()
     }
 
     dialog->m_fileWidget->setSupportedSchemes(supportedSchemes);
+    dialog->m_fileWidget->okButton()->setFocusPolicy(Qt::NoFocus);
 }
 
 void KDEPlatformFileDialogHelper::exec()
@@ -425,6 +474,7 @@ QString KDEPlatformFileDialogHelper::selectedNameFilter() const
 
 QUrl KDEPlatformFileDialogHelper::directory() const
 {
+    qDebug() << "Requesting directory";
     return m_dialog->directory();
 }
 
@@ -438,6 +488,7 @@ void KDEPlatformFileDialogHelper::selectFile(const QUrl &filename)
 
 void KDEPlatformFileDialogHelper::setDirectory(const QUrl &directory)
 {
+    qDebug() << "helper setting directory";
     if (!directory.isEmpty()) {
         m_dialog->setDirectory(directory);
         m_directorySet = true;

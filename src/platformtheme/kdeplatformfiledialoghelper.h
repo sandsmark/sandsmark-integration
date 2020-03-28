@@ -45,8 +45,12 @@ public:
     QString currentFilterText() override;
     QList<QUrl> selectedFiles() override;
 
+private slots:
+    void onAccepted();
+
 protected:
     KFileWidget *m_fileWidget;
+    QUrl m_selectedUrl;
 };
 
 class KDEPlatformFileDialogHelper : public QPlatformFileDialogHelper
