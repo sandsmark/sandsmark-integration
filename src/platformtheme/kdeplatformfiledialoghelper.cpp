@@ -34,12 +34,14 @@
 #include <KIO/StatJob>
 #include <KJobWidgets>
 
+#include <QDebug>
 #include <QMimeDatabase>
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QWindow>
 #include <QTextStream>
+#include <KUrlComboBox>
 
 namespace
 {
@@ -111,15 +113,24 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(this, &KDEPlatformFileDialog::rejected,
             m_fileWidget, &KFileWidget::slotCancel);
     connect(m_fileWidget->okButton(), &QAbstractButton::clicked, m_fileWidget, &KFileWidget::slotOk);
-    connect(m_fileWidget, &KFileWidget::accepted, m_fileWidget, &KFileWidget::accept);
-    connect(m_fileWidget, &KFileWidget::accepted, this, &QDialog::accept);
+    connect(m_fileWidget->locationEdit(), SIGNAL(returnPressed()), this, SLOT(onAccepted()));
+    connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onAccepted);
+    connect(m_fileWidget->dirOperator(), &KDirOperator::keyEnterReturnPressed, this, &KDEPlatformFileDialog::onAccepted);
     connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
     layout()->addWidget(m_buttons);
 
+
     // KWindowConfig, which is used to restore the size,  uses the current size
     // as hint, so set the suggested size here.
     resize(m_fileWidget->dialogSizeHint());
+    m_fileWidget->okButton()->setFocusPolicy(Qt::NoFocus);
+}
+
+void KDEPlatformFileDialog::onAccepted()
+{
+    m_fileWidget->accept();
+    QDialog::accept();
 }
 
 QUrl KDEPlatformFileDialog::directory()
@@ -164,7 +175,7 @@ void KDEPlatformFileDialog::setFileMode(QFileDialogOptions::FileMode mode)
         m_fileWidget->setMode(KFile::Mode::File | KFile::Mode::ExistingOnly);
         break;
     case QFileDialogOptions::FileMode::Directory:
-        m_fileWidget->setMode(KFile::Mode::Directory | KFile::Mode::ExistingOnly);
+        m_selectingDir = true;
         break;
     case QFileDialogOptions::FileMode::ExistingFiles:
         m_fileWidget->setMode(KFile::Mode::Files | KFile::Mode::ExistingOnly);
@@ -287,8 +298,9 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         m_dialog = new KDirSelectDialog(options()->initialDirectory());
         connect(m_dialog, &QDialog::accepted, this, &QPlatformDialogHelper::accept);
         connect(m_dialog, &QDialog::rejected, this, &QPlatformDialogHelper::reject);
-        if (!options()->windowTitle().isEmpty())
+        if (!options()->windowTitle().isEmpty()) {
             m_dialog->setWindowTitle(options()->windowTitle());
+        }
         return;
     }
 
@@ -299,9 +311,6 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         dialog->setWindowTitle(options()->acceptMode() == QFileDialogOptions::AcceptOpen ? i18nc("@title:window", "Open File") : i18nc("@title:window", "Save File"));
     } else {
         dialog->setWindowTitle(options()->windowTitle());
-    }
-    if (!m_directorySet) {
-        setDirectory(options()->initialDirectory());
     }
     //dialog->setViewMode(options()->viewMode()); // don't override our options, fixes remembering the chosen view mode and sizes!
     dialog->setFileMode(options()->fileMode());
@@ -327,10 +336,17 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         }
         dialog->m_fileWidget->setMimeFilter(mimeFilters, defaultMimeFilter);
 
-        if ( mimeFilters.contains( QStringLiteral("inode/directory") ) )
-            dialog->m_fileWidget->setMode( dialog->m_fileWidget->mode() | KFile::Directory );
+        if ( mimeFilters.contains( QStringLiteral("inode/directory") ) ) {
+            dialog->m_selectingDir = true;
+        }
     } else if (!nameFilters.isEmpty()) {
         dialog->m_fileWidget->setFilter(qt2KdeFilter(nameFilters));
+    }
+
+    if (!m_directorySet) {
+        if (options()->initialDirectory().isValid()) {
+            setDirectory(options()->initialDirectory());
+        }
     }
 
     if (!options()->initiallySelectedMimeTypeFilter().isEmpty()) {
@@ -352,6 +368,7 @@ void KDEPlatformFileDialogHelper::initializeDialog()
     }
 
     dialog->m_fileWidget->setSupportedSchemes(supportedSchemes);
+    dialog->m_fileWidget->okButton()->setFocusPolicy(Qt::NoFocus);
 }
 
 void KDEPlatformFileDialogHelper::exec()
