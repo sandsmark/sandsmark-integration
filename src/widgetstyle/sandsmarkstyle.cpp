@@ -51,6 +51,18 @@ int SandsmarkStyle::styleHint(QStyle::StyleHint stylehint, const QStyleOption *o
         return false;
     case QStyle::SH_Widget_Animation_Duration:
         return 0;
+    case QStyle::SH_Menu_FadeOutOnHide:
+        return false;
+    case QStyle::SH_Menu_KeyboardSearch:
+        return true;
+    case QStyle::SH_Menu_SubMenuDontStartSloppyOnLeave:
+        return true;
+    case QStyle::SH_Menu_SubMenuPopupDelay:
+        return 150;
+    case QStyle::SH_Menu_SloppySubMenus:
+        return true;
+    case QStyle::SH_ToolTip_WakeUpDelay:
+        return 0;
     default:
         break;
     }

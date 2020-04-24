@@ -8,7 +8,8 @@ QStringList SandsmarkStylePlugin::keys() const
 
 QStyle *SandsmarkStylePlugin::create(const QString &key)
 {
-    if (key.toLower() == "sandsmarkstyle")
-        return new SandsmarkStyle;
-    return nullptr;
+    if (key.toLower() != "sandsmarkstyle") {
+        return nullptr;
+    }
+    return new SandsmarkStyle;
 }
