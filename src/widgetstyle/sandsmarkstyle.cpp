@@ -61,8 +61,8 @@ int SandsmarkStyle::styleHint(QStyle::StyleHint stylehint, const QStyleOption *o
         return 150;
     case QStyle::SH_Menu_SloppySubMenus:
         return true;
-    case QStyle::SH_ToolTip_WakeUpDelay:
-        return 0;
+    //case QStyle::SH_ToolTip_WakeUpDelay:
+    //    return 0;
     default:
         break;
     }
