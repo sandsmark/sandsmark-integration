@@ -45,6 +45,9 @@ public:
     QString currentFilterText() override;
     QList<QUrl> selectedFiles() override;
 
+private slots:
+    void onFileWidgetTriesToAccepted();
+
 protected:
     KFileWidget *m_fileWidget;
 };

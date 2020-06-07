@@ -40,6 +40,8 @@
 #include <QPushButton>
 #include <QWindow>
 #include <QTextStream>
+#include <QDebug>
+#include <KUrlComboBox>
 
 namespace
 {
@@ -111,8 +113,8 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(this, &KDEPlatformFileDialog::rejected,
             m_fileWidget, &KFileWidget::slotCancel);
     connect(m_fileWidget->okButton(), &QAbstractButton::clicked, m_fileWidget, &KFileWidget::slotOk);
-    connect(m_fileWidget, &KFileWidget::accepted, m_fileWidget, &KFileWidget::accept);
-    connect(m_fileWidget, &KFileWidget::accepted, this, &QDialog::accept);
+    connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onFileWidgetTriesToAccepted);
+    connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onFileWidgetTriesToAccepted);
     connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
     layout()->addWidget(m_buttons);
@@ -120,6 +122,17 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     // KWindowConfig, which is used to restore the size,  uses the current size
     // as hint, so set the suggested size here.
     resize(m_fileWidget->dialogSizeHint());
+}
+
+void KDEPlatformFileDialog::onFileWidgetTriesToAccepted()
+{
+    if (!m_fileWidget->locationEdit()->hasFocus()) {
+        qDebug() << "Rejecting dumb behavior from KFileWidget";
+        return;
+    }
+
+    m_fileWidget->accept();
+    accept();
 }
 
 QUrl KDEPlatformFileDialog::directory()
@@ -327,8 +340,10 @@ void KDEPlatformFileDialogHelper::initializeDialog()
         }
         dialog->m_fileWidget->setMimeFilter(mimeFilters, defaultMimeFilter);
 
-        if ( mimeFilters.contains( QStringLiteral("inode/directory") ) )
+        if ( mimeFilters.contains( QStringLiteral("inode/directory") ) ) {
             dialog->m_fileWidget->setMode( dialog->m_fileWidget->mode() | KFile::Directory );
+            qDebug() << "Accepts directory";
+        }
     } else if (!nameFilters.isEmpty()) {
         dialog->m_fileWidget->setFilter(qt2KdeFilter(nameFilters));
     }
