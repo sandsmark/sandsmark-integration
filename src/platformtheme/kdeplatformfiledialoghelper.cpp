@@ -33,6 +33,7 @@
 #include <kio_version.h>
 #include <KIO/StatJob>
 #include <KJobWidgets>
+#include <kimagefilepreview.h>
 
 #include <QMimeDatabase>
 #include <QVBoxLayout>
@@ -124,6 +125,7 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onFileWidgetTriesToAccepted);
     connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
+    m_fileWidget->dirOperator()->setPreviewWidget(new KImageFilePreview);
     layout()->addWidget(m_buttons);
 
     // KWindowConfig, which is used to restore the size,  uses the current size
