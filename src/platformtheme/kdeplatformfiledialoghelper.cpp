@@ -68,7 +68,14 @@ static QString qt2KdeFilter(const QStringList &f)
             } else {
                 str << '\n';
             }
-            str << it->mid(ob + 1, (cb - ob) - 1) << '|' << it->mid(0, ob);
+
+            const QString glob = it->mid(ob + 1, (cb - ob) - 1);
+            const QString label = it->mid(0, ob);
+            if (glob == "*.*") {
+                str << "*" << '|' << label;
+            } else {
+                str << glob << '|' << label;
+            }
         }
     }
 
