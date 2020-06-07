@@ -22,6 +22,9 @@
 #include "kdeplatformfiledialoghelper.h"
 #include "kdeplatformfiledialogbase_p.h"
 #include "kdirselectdialog_p.h"
+#include "previewprovider.h"
+
+#include "sfilemetapreview.h"
 
 #include <kfilefiltercombo.h>
 #include <kfilewidget.h>
@@ -125,7 +128,8 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
     connect(m_fileWidget, &KFileWidget::accepted, this, &KDEPlatformFileDialog::onFileWidgetTriesToAccepted);
     connect(m_fileWidget->cancelButton(), &QAbstractButton::clicked, this, &QDialog::reject);
     connect(m_fileWidget->dirOperator(), &KDirOperator::urlEntered, this, &KDEPlatformFileDialogBase::directoryEntered);
-    m_fileWidget->dirOperator()->setPreviewWidget(new KImageFilePreview);
+    m_fileWidget->dirOperator()->setPreviewWidget(new SFileMetaPreview(this));
+    //m_fileWidget->dirOperator()->setPreviewWidget(new KImageFilePreview);
     layout()->addWidget(m_buttons);
 
     // KWindowConfig, which is used to restore the size,  uses the current size

@@ -19,6 +19,7 @@ set(platformtheme_SRCS
     kdeplatformsystemtrayicon.cpp
     kfiletreeview.cpp
     kdirselectdialog.cpp
+    sfilemetapreview.cpp
     x11integration.cpp
     main.cpp
 )

@@ -40,6 +40,7 @@ set(platformThemeSRCS
   ../src/platformtheme/kdirselectdialog.cpp
   ../src/platformtheme/kfiletreeview.cpp
   ../src/platformtheme/x11integration.cpp
+  ../src/platformtheme/sfilemetapreview.cpp
 )
 
 frameworkintegration_tests(
