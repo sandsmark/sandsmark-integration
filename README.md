@@ -2,6 +2,15 @@
 
 Integration of Qt application with Sandsmark's machines (advanced dotfiles I guess).
 
+
+A fork-ish of the framework-integration when that was dropped in favor of the
+plasma-integration plugin, and the maintainer wouldn't accept a patch that made
+it work outside of plasma.
+
+And I understand that people don't want to spend effort supporting frankenstein
+setups like mine (90% KDE, but no plasma-shell or kwin), so I just keep this up
+to date with anything useful from plasma-integration for myself.
+
 ## Introduction
 
 Framework Integration is a set of plugins responsible for better integration of
