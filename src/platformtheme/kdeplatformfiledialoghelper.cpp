@@ -139,7 +139,7 @@ KDEPlatformFileDialog::KDEPlatformFileDialog()
 
 void KDEPlatformFileDialog::onFileWidgetTriesToAccepted()
 {
-    if (!m_fileWidget->locationEdit()->hasFocus()) {
+    if (!m_fileWidget->locationEdit()->hasFocus() && m_fileWidget->operationMode() == KFileWidget::Saving) {
         qDebug() << "Rejecting dumb behavior from KFileWidget";
         return;
     }
