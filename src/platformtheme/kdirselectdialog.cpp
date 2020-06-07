@@ -33,6 +33,7 @@
 #include <QUrl>
 
 #include <kio/jobuidelegate.h>
+#include <kio/pixmaploader.h>
 #include <kactioncollection.h>
 #include <kauthorized.h>
 #include <kconfig.h>
@@ -55,6 +56,7 @@
 #include <kurlpixmapprovider.h>
 #include <kfilewidget.h>
 #include <KFileUtils>
+#include <KIconLoader>
 
 #include "kfiletreeview_p.h"
 #include <kfileplacesview.h>
@@ -154,7 +156,7 @@ void KDirSelectDialog::Private::slotMkdir()
         folderurl.setPath(folderurl.path() + QLatin1Char('/') + *it);
         KIO::StatJob *job = KIO::stat(folderurl);
         KJobWidgets::setWindow(job, m_parent);
-        job->setDetails(0); //We only want to know if it exists, 0 == that.
+        job->setDetails(KIO::StatNoDetails); //We only want to know if it exists, 0 == that.
         job->setSide(KIO::StatJob::DestinationSide);
         exists = job->exec();
         if (!exists) {
@@ -325,7 +327,15 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     d->m_urlCombo->setLayoutDirection(Qt::LeftToRight);
     d->m_urlCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
     d->m_urlCombo->setTrapReturnKey(true);
-    d->m_urlCombo->setPixmapProvider(new KUrlPixmapProvider());
+    d->m_urlCombo->setIconProvider([this](const QString &name) {
+        const QSize iconSize = this->d->m_urlCombo->iconSize();
+        const int size = qMax(iconSize.width(), iconSize.height());
+        if (QFile::exists(name)) {
+            return KIO::pixmapForUrl(QUrl::fromLocalFile(name), 0, KIconLoader::Desktop, size);
+        } else {
+            return KIO::pixmapForUrl(QUrl(name), 0, KIconLoader::Desktop, size);
+        }
+    });
     KUrlCompletion *comp = new KUrlCompletion();
     comp->setMode(KUrlCompletion::DirCompletion);
     d->m_urlCombo->setCompletionObject(comp, true);
