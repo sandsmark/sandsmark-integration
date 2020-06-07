@@ -44,8 +44,30 @@
 #include <kstandardshortcut.h>
 #include <KStandardGuiItem>
 #include <KLocalizedString>
+#include <KBookmark>
+#include <KBookmarkManager>
+#include <KConfigGroup>
 #include <KIO/Global>
 #include <QtQuickControls2/QQuickStyle>
+
+static void maybeAddRecentDocuments()
+{
+    const QString bookmarksFile = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + QLatin1String("/user-places.xbel");
+
+    KBookmarkManager *bookmarkManager = KBookmarkManager::managerForExternalFile(bookmarksFile);
+    KBookmarkGroup root = bookmarkManager->root();
+    KBookmark current = root.first();
+    const QUrl url("recentdocuments:/");
+    while (!current.isNull()) {
+        if (current.url() == url) {
+            return;
+        }
+        current = root.next(current);
+    }
+
+    KBookmark bookmark = root.addBookmark(i18n("Recent Documents"), url, "document-open-recent");
+    bookmark.setMetaDataItem("isSystemItem", "true");
+}
 
 KdePlatformTheme::KdePlatformTheme()
 {
@@ -55,6 +77,14 @@ KdePlatformTheme::KdePlatformTheme()
         m_x11Integration->init();
     }
     setQtQuickControlsTheme();
+
+    maybeAddRecentDocuments();
+
+    KConfigGroup config = KSharedConfig::openConfig()->group(QByteArray("RecentDocuments"));
+    int maxEntries = config.readEntry(QStringLiteral("MaxEntries"), 10);
+    if (maxEntries == 10) {
+        config.writeEntry(QStringLiteral("MaxEntries"), 100);
+    }
 }
 
 KdePlatformTheme::~KdePlatformTheme()
