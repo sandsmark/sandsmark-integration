@@ -57,6 +57,7 @@
 #include <kfilewidget.h>
 #include <KFileUtils>
 #include <KIconLoader>
+#include <KStandardShortcut>
 
 #include "kfiletreeview_p.h"
 #include <kfileplacesview.h>
@@ -354,14 +355,14 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     d->moveToTrash = new QAction(i18nc("@action:inmenu", "Move to Trash"), this);
     d->m_actions->addAction(d->moveToTrash->objectName(), d->moveToTrash);
     d->moveToTrash->setIcon(QIcon::fromTheme(QStringLiteral("user-trash")));
-    d->moveToTrash->setShortcut(Qt::Key_Delete);
+    d->moveToTrash->setShortcuts(KStandardShortcut::moveToTrash());
     connect(d->moveToTrash, SIGNAL(triggered(bool)), this, SLOT(slotMoveToTrash()));
     d->m_contextMenu->addAction(d->moveToTrash);
 
     d->deleteAction = new QAction(i18nc("@action:inmenu", "Delete"), this);
     d->m_actions->addAction(d->deleteAction->objectName(), d->deleteAction);
     d->deleteAction->setIcon(QIcon::fromTheme(QStringLiteral("edit-delete")));
-    d->deleteAction->setShortcut(Qt::SHIFT + Qt::Key_Delete);
+    d->deleteAction->setShortcuts(KStandardShortcut::deleteFile());
     connect(d->deleteAction, SIGNAL(triggered(bool)), this, SLOT(slotDelete()));
     d->m_contextMenu->addAction(d->deleteAction);
 
@@ -369,7 +370,7 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
 
     d->showHiddenFoldersAction = new KToggleAction(i18nc("@option:check", "Show Hidden Folders"), this);
     d->m_actions->addAction(d->showHiddenFoldersAction->objectName(), d->showHiddenFoldersAction);
-    d->showHiddenFoldersAction->setShortcut(Qt::Key_F8);
+    d->showHiddenFoldersAction->setShortcuts(KStandardShortcut::showHideHiddenFiles());
     connect(d->showHiddenFoldersAction, &QAction::triggered, d->m_treeView, &KFileTreeView::setShowHiddenFiles);
     d->m_contextMenu->addAction(d->showHiddenFoldersAction);
     d->m_contextMenu->addSeparator();
