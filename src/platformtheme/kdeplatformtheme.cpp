@@ -76,15 +76,15 @@ KdePlatformTheme::KdePlatformTheme()
         m_x11Integration.reset(new X11Integration());
         m_x11Integration->init();
     }
-    setQtQuickControlsTheme();
 
-    maybeAddRecentDocuments();
+    setQtQuickControlsTheme();
 
     KConfigGroup config = KSharedConfig::openConfig()->group(QByteArray("RecentDocuments"));
     int maxEntries = config.readEntry(QStringLiteral("MaxEntries"), 10);
     if (maxEntries == 10) {
         config.writeEntry(QStringLiteral("MaxEntries"), 100);
     }
+    QTimer::singleShot(0, maybeAddRecentDocuments);
 }
 
 KdePlatformTheme::~KdePlatformTheme()
