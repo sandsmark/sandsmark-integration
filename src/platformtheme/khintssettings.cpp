@@ -72,8 +72,13 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
         mLnfConfig = KSharedConfig::openConfig(QStandardPaths::locate(QStandardPaths::GenericDataLocation, QStringLiteral("plasma/look-and-feel/") + looknfeel + QStringLiteral("/contents/defaults")));
     }
 
-    const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), 0).toInt();
-    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : -1; // -1 => no blinking
+    if (qApp->applicationName() == QLatin1String("okteta")) { // okteta is bugged, and too many assumptions, so easier to fix here
+        m_hints[QPlatformTheme::CursorFlashTime] = 500;
+    } else {
+        const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), -1).toInt();
+        m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : -1;
+    }
+
     m_hints[QPlatformTheme::MouseDoubleClickInterval] = readConfigValue(cg, QStringLiteral("DoubleClickInterval"), 400);
     m_hints[QPlatformTheme::StartDragDistance] = readConfigValue(cg, QStringLiteral("StartDragDist"), 10);
     m_hints[QPlatformTheme::StartDragTime] = readConfigValue(cg, QStringLiteral("StartDragTime"), 500);
