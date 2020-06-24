@@ -335,8 +335,12 @@ void KHintsSettings::iconChanged(int group)
 
 void KHintsSettings::updateQtSettings(KConfigGroup &cg)
 {
-    const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), -1).toInt();
-    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : -1; // 0 => no blinking
+    if (qApp->applicationName() == QLatin1String("okteta")) { // okteta is bugged, and too many assumptions, so easier to fix here
+        m_hints[QPlatformTheme::CursorFlashTime] = 500;
+    } else {
+        const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), -1).toInt();
+        m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : -1;
+    }
 
     int doubleClickInterval = cg.readEntry("DoubleClickInterval", 400);
     m_hints[QPlatformTheme::MouseDoubleClickInterval] = doubleClickInterval;
