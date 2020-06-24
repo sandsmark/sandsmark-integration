@@ -73,7 +73,7 @@ KHintsSettings::KHintsSettings(KSharedConfig::Ptr kdeglobals)
     }
 
     const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), 0).toInt();
-    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : 0; // 0 => no blinking
+    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : -1; // -1 => no blinking
     m_hints[QPlatformTheme::MouseDoubleClickInterval] = readConfigValue(cg, QStringLiteral("DoubleClickInterval"), 400);
     m_hints[QPlatformTheme::StartDragDistance] = readConfigValue(cg, QStringLiteral("StartDragDist"), 10);
     m_hints[QPlatformTheme::StartDragTime] = readConfigValue(cg, QStringLiteral("StartDragTime"), 500);
@@ -335,8 +335,8 @@ void KHintsSettings::iconChanged(int group)
 
 void KHintsSettings::updateQtSettings(KConfigGroup &cg)
 {
-    const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), 0).toInt();
-    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : 0; // 0 => no blinking
+    const int cursorBlinkRate = readConfigValue(cg, QStringLiteral("CursorBlinkRate"), -1).toInt();
+    m_hints[QPlatformTheme::CursorFlashTime] = cursorBlinkRate > 0 ? qBound(200, cursorBlinkRate, 2000) : -1; // 0 => no blinking
 
     int doubleClickInterval = cg.readEntry("DoubleClickInterval", 400);
     m_hints[QPlatformTheme::MouseDoubleClickInterval] = doubleClickInterval;
