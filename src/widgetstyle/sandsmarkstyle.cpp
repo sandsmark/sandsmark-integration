@@ -292,7 +292,12 @@ void SandsmarkStyle::drawComplexControl(ComplexControl control, const QStyleOpti
         if (!horizontal)
             gradient = QLinearGradient(rect.left(), rect.center().y(),
                     rect.right(), rect.center().y());
-        if (!transient || !isDarkBg) {
+        if (!isDarkBg) {
+            gradient.setColorAt(0.0, buttonColor.darker(357));
+            gradient.setColorAt(0.1, buttonColor.darker(355));
+            gradient.setColorAt(0.9, buttonColor.darker(355));
+            gradient.setColorAt(1.0, buttonColor.darker(357));
+        } else if (!transient) {
             gradient.setColorAt(0.0, buttonColor.darker(157));
             gradient.setColorAt(0.1, buttonColor.darker(155));
             gradient.setColorAt(0.9, buttonColor.darker(155));
