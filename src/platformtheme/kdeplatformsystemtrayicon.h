@@ -109,7 +109,7 @@ public:
     static bool isStatusNotifierAvailable();
 
 private:
-    KStatusNotifierItem *m_sni;
+    KStatusNotifierItem *m_sni = nullptr;
 };
 
 #endif

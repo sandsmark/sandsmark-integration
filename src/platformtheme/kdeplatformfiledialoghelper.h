@@ -49,7 +49,7 @@ private slots:
     void onFileWidgetTriesToAccepted();
 
 protected:
-    KFileWidget *m_fileWidget;
+    KFileWidget *const m_fileWidget;
 };
 
 class KDEPlatformFileDialogHelper : public QPlatformFileDialogHelper
@@ -84,7 +84,7 @@ private Q_SLOTS:
 
 private:
     void restoreSize();
-    KDEPlatformFileDialogBase *m_dialog;
+    KDEPlatformFileDialogBase *m_dialog = nullptr;
     bool m_directorySet = false;
     bool m_fileSelected = false;
     bool m_dialogInitialized = false;
