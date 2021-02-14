@@ -38,5 +38,5 @@ Some differences from plasma-framework (there's more, ut things just work by now
     - Fix crashing in pure QML apps (i. e. no QApplication)
     - Disabled useless warnings.
 
-Also all fixes from plasma-integration are integrated.
-
+Also all fixes from plasma-integration are integrated. Last commit synced:
+b6f4feb63ab47bfee6e28dcc451aa62d7a369753
