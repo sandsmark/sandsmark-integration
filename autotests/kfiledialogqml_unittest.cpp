@@ -52,8 +52,6 @@ private Q_SLOTS:
 
             fw = findFileWidget();
             QVERIFY(fw);
-            // real show() is delayed to next event.
-            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             QCOMPARE(fw->isVisible(), true);
             fw->slotCancel();
         }
@@ -71,8 +69,6 @@ private Q_SLOTS:
 
             fw = findFileWidget();
             QVERIFY(fw);
-            // real show() is delayed to next event.
-            QVERIFY(QTest::qWaitForWindowExposed(fw->window()));
             QCOMPARE(fw->isVisible(), true);
             fw->slotCancel();
         }

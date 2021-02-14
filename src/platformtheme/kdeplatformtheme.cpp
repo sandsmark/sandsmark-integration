@@ -38,6 +38,7 @@
 #include <QDebug>
 #include <QX11Info>
 #include <QThread>
+#include <QTimer>
 
 #include <kiconengine.h>
 #include <kiconloader.h>
