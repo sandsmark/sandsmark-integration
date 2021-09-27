@@ -17,7 +17,7 @@
 #include <KPluginFactory>
 #include <kimagefilepreview.h>
 
-bool SFileMetaPreview::s_tryAudioPreview = true;
+bool SFileMetaPreview::s_tryAudioPreview = false;
 
 SFileMetaPreview::SFileMetaPreview(QWidget *parent)
     : KPreviewWidgetBase(parent),
