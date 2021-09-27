@@ -15,16 +15,8 @@
 #include <KConfigGroup>
 #include <KIconUtils>
 #include <KLocalizedString>
-#include <KMountPoint>
+#include <QDebug>
 #include <kprotocolinfo.h>
-#include <solid/block.h>
-#include <solid/networkshare.h>
-#include <solid/opticaldisc.h>
-#include <solid/opticaldrive.h>
-#include <solid/portablemediaplayer.h>
-#include <solid/storageaccess.h>
-#include <solid/storagedrive.h>
-#include <solid/storagevolume.h>
 
 static bool isTrash(const KBookmark &bk)
 {
@@ -50,24 +42,6 @@ SFilePlacesItem::SFilePlacesItem(KBookmarkManager *manager, const QString &addre
             m_folderIsEmpty = group.readEntry("Empty", true);
         }
     }
-
-    // Hide SSHFS network device mounted by kdeconnect, since we already have the kdeconnect:// place.
-    if (isDevice() && m_access && device().vendor() == QLatin1String("fuse.sshfs")) {
-        // Not using findByPath() as it resolves symlinks, potentially blocking,
-        // but here we know we query for an existing actual mount point.
-        const auto mountPoints = KMountPoint::currentMountPoints();
-        for (const auto &mountPoint : mountPoints) {
-            if (mountPoint->mountPoint() == m_access->filePath()) {
-                if (mountPoint->mountedFrom().startsWith(QLatin1String("kdeconnect@"))) {
-                    // Hide only if the user never set the "Hide" checkbox on the device.
-                    if (m_bookmark.metaDataItem(QStringLiteral("IsHidden")).isEmpty()) {
-                        setHidden(true);
-                    }
-                }
-                break;
-            }
-        }
-    }
 }
 
 SFilePlacesItem::~SFilePlacesItem()
@@ -90,22 +64,22 @@ bool SFilePlacesItem::hasSupportedScheme(const QStringList &schemes) const
     }
 
     // StorageAccess is always local, doesn't need to be accessible to know this
-    if (m_access && schemes.contains(QLatin1String("file"))) {
-        return true;
-    }
+    //if (m_access && schemes.contains(QLatin1String("file"))) {
+    //    return true;
+    //}
 
-    if (m_networkShare && schemes.contains(m_networkShare->url().scheme())) {
-        return true;
-    }
+    //if (m_networkShare && schemes.contains(m_networkShare->url().scheme())) {
+    //    return true;
+    //}
 
-    if (m_player) {
-        const QStringList protocols = m_player->supportedProtocols();
-        for (const QString &protocol : protocols) {
-            if (schemes.contains(protocol)) {
-                return true;
-            }
-        }
-    }
+    //if (m_player) {
+    //    const QStringList protocols = m_player->supportedProtocols();
+    //    for (const QString &protocol : protocols) {
+    //        if (schemes.contains(protocol)) {
+    //            return true;
+    //        }
+    //    }
+    //}
 
     return false;
 }
@@ -166,11 +140,6 @@ void SFilePlacesItem::setBookmark(const KBookmark &bookmark)
     }
 }
 
-Solid::Device SFilePlacesItem::device() const
-{
-    return m_device;
-}
-
 QVariant SFilePlacesItem::data(int role) const
 {
     if (role == SFilePlacesModel::GroupRole) {
@@ -209,13 +178,13 @@ SFilePlacesModel::GroupType SFilePlacesItem::groupType() const
         }
     }
 
-    if (m_drive && (m_drive->isHotpluggable() || m_drive->isRemovable())) {
-        return SFilePlacesModel::RemovableDevicesType;
-    } else if (m_networkShare) {
-        return SFilePlacesModel::RemoteType;
-    } else {
+    //if (m_drive && (m_drive->isHotpluggable() || m_drive->isRemovable())) {
+    //    return SFilePlacesModel::RemovableDevicesType;
+    ////} else if (m_networkShare) {
+    ////    return SFilePlacesModel::RemoteType;
+    //} else {
         return SFilePlacesModel::DevicesType;
-    }
+    //}
 }
 
 bool SFilePlacesItem::isHidden() const
@@ -265,57 +234,26 @@ QVariant SFilePlacesItem::bookmarkData(int role) const
 
 QVariant SFilePlacesItem::deviceData(int role) const
 {
-    Solid::Device d = device();
-
-    if (d.isValid()) {
+    if (m_device.isValid()) {
         switch (role) {
         case Qt::DisplayRole:
-            return d.displayName();
+            return m_device.displayName();
         case Qt::DecorationRole:
             // qDebug() << "adding emblems" << m_emblems << "to device icon" << m_deviceIconName;
-            return KIconUtils::addOverlays(m_deviceIconName, m_emblems);
+            return QIcon::fromTheme("drive-harddisk");
         case SFilePlacesModel::UrlRole:
-            if (m_access) {
-                const QString path = m_access->filePath();
-                return path.isEmpty() ? QUrl() : QUrl::fromLocalFile(path);
-            } else if (m_disc && (m_disc->availableContent() & Solid::OpticalDisc::Audio) != 0) {
-                Solid::Block *block = d.as<Solid::Block>();
-                if (block) {
-                    QString device = block->device();
-                    return QUrl(QStringLiteral("audiocd:/?device=%1").arg(device));
-                }
-                // We failed to get the block device. Assume audiocd:/ can
-                // figure it out, but cannot handle multiple disc drives.
-                // See https://bugs.kde.org/show_bug.cgi?id=314544#c40
-                return QUrl(QStringLiteral("audiocd:/"));
-            } else if (m_player) {
-                const QStringList protocols = m_player->supportedProtocols();
-                if (!protocols.isEmpty()) {
-                    return QUrl(QStringLiteral("%1:udi=%2").arg(protocols.first(), d.udi()));
-                }
-                return QVariant();
-            } else {
-                return QVariant();
-            }
+            return QUrl::fromLocalFile(m_device.rootPath());
         case SFilePlacesModel::SetupNeededRole:
-            if (m_access) {
-                return !m_isAccessible;
-            } else {
-                return QVariant();
-            }
+            return !m_device.isReady();
 
-        case SFilePlacesModel::FixedDeviceRole: {
-            if (m_drive != nullptr) {
-                return !m_drive->isHotpluggable() && !m_drive->isRemovable();
-            }
+        case SFilePlacesModel::FixedDeviceRole:
             return true;
-        }
 
         case SFilePlacesModel::CapacityBarRecommendedRole:
-            return m_isAccessible && !m_isCdrom;
+            return m_device.isReady();
 
         case SFilePlacesModel::IconNameRole:
-            return m_deviceIconName;
+            return "drive-harddisk";
 
         default:
             return QVariant();
@@ -402,57 +340,10 @@ QString SFilePlacesItem::generateNewId()
     //         + '/' + QString::number(qrand());
 }
 
-bool SFilePlacesItem::updateDeviceInfo(const QString &udi)
-{
-    if (m_device.udi() == udi) {
-        return false;
-    }
-
-    if (m_access) {
-        m_access->disconnect(this);
-    }
-
-    m_device = Solid::Device(udi);
-    if (m_device.isValid()) {
-        m_access = m_device.as<Solid::StorageAccess>();
-        m_volume = m_device.as<Solid::StorageVolume>();
-        m_disc = m_device.as<Solid::OpticalDisc>();
-        m_player = m_device.as<Solid::PortableMediaPlayer>();
-        m_networkShare = m_device.as<Solid::NetworkShare>();
-        m_deviceIconName = m_device.icon();
-        m_emblems = m_device.emblems();
-
-        m_drive = nullptr;
-        Solid::Device parentDevice = m_device;
-        while (parentDevice.isValid() && !m_drive) {
-            m_drive = parentDevice.as<Solid::StorageDrive>();
-            parentDevice = parentDevice.parent();
-        }
-
-        if (m_access) {
-            connect(m_access.data(), &Solid::StorageAccess::accessibilityChanged, this, &SFilePlacesItem::onAccessibilityChanged);
-            onAccessibilityChanged(m_access->isAccessible());
-        }
-    } else {
-        m_access = nullptr;
-        m_volume = nullptr;
-        m_disc = nullptr;
-        m_player = nullptr;
-        m_drive = nullptr;
-        m_networkShare = nullptr;
-        m_deviceIconName.clear();
-        m_emblems.clear();
-    }
-
-    return true;
-}
-
 void SFilePlacesItem::onAccessibilityChanged(bool isAccessible)
 {
     m_isAccessible = isAccessible;
-    m_isCdrom =
-        m_device.is<Solid::OpticalDrive>() || m_device.parent().is<Solid::OpticalDrive>() || (m_volume && m_volume->fsType() == QLatin1String("iso9660"));
-    m_emblems = m_device.emblems();
+    m_isCdrom = m_device.fileSystemType() == "iso9660";
 
     Q_EMIT itemChanged(id());
 }

@@ -49,7 +49,6 @@ void SFileMetaPreview::initPreviewProviders()
     resize(imagePreview->sizeHint());
 
     const QStringList mimeTypes = imagePreview->supportedMimeTypes();
-    qDebug() << mimeTypes;
     QStringList::ConstIterator it = mimeTypes.begin();
     for (; it != mimeTypes.end(); ++it) {
 //         qDebug(".... %s", (*it).toLatin1().constData());

@@ -14,18 +14,9 @@
 #include <QPointer>
 #include <QStringList>
 #include <QUrl>
-#include <solid/device.h>
+#include <QStorageInfo>
 
 class KDirLister;
-namespace Solid
-{
-class StorageAccess;
-class StorageVolume;
-class StorageDrive;
-class NetworkShare;
-class OpticalDisc;
-class PortableMediaPlayer;
-}
 
 class SFilePlacesItem : public QObject
 {
@@ -49,7 +40,7 @@ public:
     bool isDevice() const;
     KBookmark bookmark() const;
     void setBookmark(const KBookmark &bookmark);
-    Solid::Device device() const;
+    QStorageInfo device() const;
     QVariant data(int role) const;
     SFilePlacesModel::GroupType groupType() const;
     bool isHidden() const;
@@ -81,7 +72,9 @@ private:
     QString iconNameForBookmark(const KBookmark &bookmark) const;
 
     static QString generateNewId();
-    bool updateDeviceInfo(const QString &udi);
+    bool updateDeviceInfo(const QString &udi) {
+        m_device.setPath(udi);
+    }
 
     KBookmarkManager *m_manager;
     KBookmark m_bookmark;
@@ -89,13 +82,7 @@ private:
     bool m_isCdrom;
     bool m_isAccessible;
     QString m_text;
-    Solid::Device m_device;
-    QPointer<Solid::StorageAccess> m_access;
-    QPointer<Solid::StorageVolume> m_volume;
-    QPointer<Solid::StorageDrive> m_drive;
-    QPointer<Solid::OpticalDisc> m_disc;
-    QPointer<Solid::PortableMediaPlayer> m_player;
-    QPointer<Solid::NetworkShare> m_networkShare;
+    QStorageInfo m_device;
     QString m_deviceIconName;
     QStringList m_emblems;
     QString m_groupName;

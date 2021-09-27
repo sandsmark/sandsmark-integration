@@ -14,8 +14,7 @@
 #include <KBookmark>
 #include <QAbstractItemModel>
 #include <QUrl>
-
-#include <solid/device.h>
+#include <QStorageInfo>
 
 #include <memory>
 
@@ -118,7 +117,7 @@ public:
      * @return The solid device of the place at index @p index, if it is a device. Otherwise a default Solid::Device() instance is returned.
      * @see isDevice()
      */
-    Solid::Device deviceForIndex(const QModelIndex &index) const;
+    QStorageInfo deviceForIndex(const QModelIndex &index) const;
 
     /**
      * @return The KBookmark instance of the place at index @p index.
@@ -145,38 +144,6 @@ public:
      * @since 5.42
      */
     QModelIndexList groupIndexes(const GroupType type) const;
-
-    /**
-     * @return A QAction with a proper translated label that can be used to trigger the requestTeardown()
-     * method for the place at index @p index.
-     * @see requestTeardown()
-     */
-    QAction *teardownActionForIndex(const QModelIndex &index) const;
-
-    /**
-     * @return A QAction with a proper translated label that can be used to trigger the requestEject()
-     * method for the place at index @p index.
-     * @see requestEject()
-     */
-    QAction *ejectActionForIndex(const QModelIndex &index) const;
-
-    /**
-     * Unmounts the place at index @p index by triggering the teardown functionality of its Solid device.
-     * @see deviceForIndex()
-     */
-    void requestTeardown(const QModelIndex &index);
-
-    /**
-     * Ejects the place at index @p index by triggering the eject functionality of its Solid device.
-     * @see deviceForIndex()
-     */
-    void requestEject(const QModelIndex &index);
-
-    /**
-     * Mounts the place at index @p index by triggering the setup functionality of its Solid device.
-     * @see deviceForIndex()
-     */
-    void requestSetup(const QModelIndex &index);
 
     /**
      * Adds a new place to the model.
@@ -336,13 +303,6 @@ Q_SIGNALS:
      * @p message An error message explaining what went wrong.
      */
     void errorMessage(const QString &message);
-
-    /**
-     * Emitted after the Solid setup ends.
-     * @param success Whether the Solid setup has been successful.
-     * @see requestSetup()
-     */
-    void setupDone(const QModelIndex &index, bool success);
 
     /**
      * Emitted whenever the visibility of the group @p group changes.

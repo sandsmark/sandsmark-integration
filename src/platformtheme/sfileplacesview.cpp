@@ -35,11 +35,6 @@
 #include <kio/jobuidelegate.h>
 #include <kmountpoint.h>
 #include <kpropertiesdialog.h>
-#include <solid/opticaldisc.h>
-#include <solid/opticaldrive.h>
-#include <solid/storageaccess.h>
-#include <solid/storagedrive.h>
-#include <solid/storagevolume.h>
 
 #include <kfileplaceeditdialog.h>
 #include "sfileplacesmodel.h"
@@ -572,7 +567,6 @@ public:
     void placeClicked(const QModelIndex &index);
     void placeEntered(const QModelIndex &index);
     void placeLeft(const QModelIndex &index);
-    void storageSetupDone(const QModelIndex &index, bool success);
     void adaptItemsUpdate(qreal value);
     void itemAppearUpdate(qreal value);
     void itemDisappearUpdate(qreal value);
@@ -585,7 +579,6 @@ public:
     SFilePlacesEventWatcher *const m_watcher;
     SFilePlacesViewDelegate *m_delegate;
 
-    Solid::StorageAccess *m_lastClickedStorage = nullptr;
     QPersistentModelIndex m_lastClickedIndex;
 
     QTimeLine m_adaptItemsTimeline;
@@ -824,13 +817,10 @@ void SFilePlacesView::contextMenuEvent(QContextMenuEvent *event)
 
     QAction *edit = nullptr;
     QAction *hide = nullptr;
-    QAction *eject = nullptr;
-    QAction *teardown = nullptr;
     QAction *add = nullptr;
     QAction *mainSeparator = nullptr;
     QAction *hideSection = nullptr;
     QAction *properties = nullptr;
-    QAction *mount = nullptr;
 
     const bool clickOverHeader = d->m_delegate->pointIsHeaderArea(event->pos());
     if (clickOverHeader) {
@@ -847,35 +837,6 @@ void SFilePlacesView::contextMenuEvent(QContextMenuEvent *event)
             add = menu.addAction(QIcon::fromTheme(QStringLiteral("document-new")), i18n("Add Entry..."));
             mainSeparator = menu.addSeparator();
         } else {
-            eject = placesModel->ejectActionForIndex(index);
-            if (eject != nullptr) {
-                eject->setParent(&menu);
-                menu.addAction(eject);
-            }
-
-            teardown = placesModel->teardownActionForIndex(index);
-            if (teardown != nullptr) {
-                // Disable teardown option for root and home partitions
-                bool teardownEnabled = placeUrl != QUrl::fromLocalFile(QDir::rootPath());
-                if (teardownEnabled) {
-                    KMountPoint::Ptr mountPoint = KMountPoint::currentMountPoints().findByPath(QDir::homePath());
-                    if (mountPoint && placeUrl == QUrl::fromLocalFile(mountPoint->mountPoint())) {
-                        teardownEnabled = false;
-                    }
-                }
-                teardown->setEnabled(teardownEnabled);
-
-                teardown->setParent(&menu);
-                menu.addAction(teardown);
-            }
-
-            if (placesModel->setupNeeded(index)) {
-                mount = menu.addAction(QIcon::fromTheme(QStringLiteral("media-mount")), i18nc("@action:inmenu", "Mount"));
-            }
-
-            if (teardown != nullptr || eject != nullptr || mount != nullptr) {
-                mainSeparator = menu.addSeparator();
-            }
         }
         if (add == nullptr) {
             add = menu.addAction(QIcon::fromTheme(QStringLiteral("document-new")), i18n("Add Entry..."));
@@ -963,10 +924,6 @@ void SFilePlacesView::contextMenuEvent(QContextMenuEvent *event)
         }
     } else if (showAll && (result == showAll)) {
         setShowAll(showAll->isChecked());
-    } else if (teardown && (result == teardown)) {
-        placesModel->requestTeardown(index);
-    } else if (eject && (result == eject)) {
-        placesModel->requestEject(index);
     } else if (add && (result == add)) {
         QUrl url = d->m_currentUrl;
         QString label;
@@ -980,8 +937,6 @@ void SFilePlacesView::contextMenuEvent(QContextMenuEvent *event)
 
             placesModel->addPlace(label, url, iconName, appName, index);
         }
-    } else if (mount && (result == mount)) {
-        placesModel->requestSetup(index);
     }
 
     index = placesModel->closestItem(d->m_currentUrl);
@@ -1488,16 +1443,6 @@ void SFilePlacesViewPrivate::placeClicked(const QModelIndex &index)
 
     m_lastClickedIndex = QPersistentModelIndex();
 
-    if (placesModel->setupNeeded(index)) {
-        QObject::connect(placesModel, &SFilePlacesModel::setupDone, q, [this](const QModelIndex &idx, bool success) {
-            storageSetupDone(idx, success);
-        });
-
-        m_lastClickedIndex = index;
-        placesModel->requestSetup(index);
-        return;
-    }
-
     setCurrentIndex(index);
 }
 
@@ -1517,27 +1462,6 @@ void SFilePlacesViewPrivate::placeLeft(const QModelIndex &index)
     if (!m_pollingRequestCount) {
         m_pollDevices.stop();
     }
-}
-
-void SFilePlacesViewPrivate::storageSetupDone(const QModelIndex &index, bool success)
-{
-    if (index != m_lastClickedIndex) {
-        return;
-    }
-
-    SFilePlacesModel *placesModel = qobject_cast<SFilePlacesModel *>(q->model());
-
-    if (placesModel) {
-        QObject::disconnect(placesModel, &SFilePlacesModel::setupDone, q, nullptr);
-    }
-
-    if (success) {
-        setCurrentIndex(m_lastClickedIndex);
-    } else {
-        q->setUrl(m_currentUrl);
-    }
-
-    m_lastClickedIndex = QPersistentModelIndex();
 }
 
 void SFilePlacesViewPrivate::adaptItemsUpdate(qreal value)

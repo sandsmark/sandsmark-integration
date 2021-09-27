@@ -38,14 +38,6 @@
 #include <KConfigGroup>
 
 #include <QStandardPaths>
-#include <solid/devicenotifier.h>
-#include <solid/opticaldisc.h>
-#include <solid/opticaldrive.h>
-#include <solid/portablemediaplayer.h>
-#include <solid/predicate.h>
-#include <solid/storageaccess.h>
-#include <solid/storagedrive.h>
-#include <solid/storagevolume.h>
 
 namespace
 {
@@ -198,7 +190,6 @@ public:
     QMap<QObject *, QPersistentModelIndex> setupInProgress;
     QStringList supportedSchemes;
 
-    Solid::Predicate predicate;
     KBookmarkManager *bookmarkManager;
 
     const bool fileIndexingEnabled;
@@ -218,8 +209,6 @@ public:
     void deviceRemoved(const QString &udi);
     void itemChanged(const QString &udi);
     void reloadBookmarks();
-    void storageSetupDone(Solid::ErrorType error, const QVariant &errorData, Solid::StorageAccess *sender);
-    void storageTeardownDone(Solid::ErrorType error, const QVariant &errorData);
 
 private:
     bool isBalooUrl(const QUrl &url) const;
@@ -478,26 +467,6 @@ SFilePlacesModel::SFilePlacesModel(const QString &alternativeApplicationName, QO
         d->bookmarkManager->save();
     }
 
-    QString predicate(
-        QString::fromLatin1("[[[[ StorageVolume.ignored == false AND [ StorageVolume.usage == 'FileSystem' OR StorageVolume.usage == 'Encrypted' ]]"
-                            " OR "
-                            "[ IS StorageAccess AND StorageDrive.driveType == 'Floppy' ]]"
-                            " OR "
-                            "OpticalDisc.availableContent & 'Audio' ]"
-                            " OR "
-                            "StorageAccess.ignored == false ]"));
-
-    if (KProtocolInfo::isKnownProtocol(QStringLiteral("mtp"))) {
-        predicate = QLatin1Char('[') + predicate + QLatin1String(" OR PortableMediaPlayer.supportedProtocols == 'mtp']");
-    }
-    if (KProtocolInfo::isKnownProtocol(QStringLiteral("afc"))) {
-        predicate = QLatin1Char('[') + predicate + QLatin1String(" OR PortableMediaPlayer.supportedProtocols == 'afc']");
-    }
-
-    d->predicate = Solid::Predicate::fromString(predicate);
-
-    Q_ASSERT(d->predicate.isValid());
-
     connect(d->bookmarkManager, &KBookmarkManager::changed, this, [this]() {
         d->reloadBookmarks();
     });
@@ -571,10 +540,10 @@ bool SFilePlacesModel::isDevice(const QModelIndex &index) const
     return item->isDevice();
 }
 
-Solid::Device SFilePlacesModel::deviceForIndex(const QModelIndex &index) const
+QStorageInfo SFilePlacesModel::deviceForIndex(const QModelIndex &index) const
 {
     if (!index.isValid()) {
-        return Solid::Device();
+        return QStorageInfo();
     }
 
     SFilePlacesItem *item = static_cast<SFilePlacesItem *>(index.internalPointer());
@@ -582,7 +551,7 @@ Solid::Device SFilePlacesModel::deviceForIndex(const QModelIndex &index) const
     if (item->isDevice()) {
         return item->device();
     } else {
-        return Solid::Device();
+        return QStorageInfo();
     }
 }
 
@@ -708,42 +677,12 @@ QModelIndex SFilePlacesModel::closestItem(const QUrl &url) const
 
 void SFilePlacesModelPrivate::initDeviceList()
 {
-    Solid::DeviceNotifier *notifier = Solid::DeviceNotifier::instance();
-
-    QObject::connect(notifier, &Solid::DeviceNotifier::deviceAdded, q, [this](const QString &device) {
-        deviceAdded(device);
-    });
-    QObject::connect(notifier, &Solid::DeviceNotifier::deviceRemoved, q, [this](const QString &device) {
-        deviceRemoved(device);
-    });
-
-    const QList<Solid::Device> &deviceList = Solid::Device::listFromQuery(predicate);
-
-    availableDevices.reserve(deviceList.size());
-    for (const Solid::Device &device : deviceList) {
-        availableDevices << device.udi();
+    availableDevices.clear();
+    for (const QStorageInfo &info : QStorageInfo::mountedVolumes()) {
+        //availableDevices.append(info.rootPath());
     }
 
     reloadBookmarks();
-}
-
-void SFilePlacesModelPrivate::deviceAdded(const QString &udi)
-{
-    Solid::Device d(udi);
-
-    if (predicate.matches(d)) {
-        availableDevices << udi;
-        reloadBookmarks();
-    }
-}
-
-void SFilePlacesModelPrivate::deviceRemoved(const QString &udi)
-{
-    auto it = std::find(availableDevices.begin(), availableDevices.end(), udi);
-    if (it != availableDevices.end()) {
-        availableDevices.erase(it);
-        reloadBookmarks();
-    }
 }
 
 void SFilePlacesModelPrivate::itemChanged(const QString &id)
@@ -1335,141 +1274,6 @@ int SFilePlacesModel::hiddenCount() const
     }
 
     return hidden;
-}
-
-QAction *SFilePlacesModel::teardownActionForIndex(const QModelIndex &index) const
-{
-    Solid::Device device = deviceForIndex(index);
-
-    if (device.is<Solid::StorageAccess>() && device.as<Solid::StorageAccess>()->isAccessible()) {
-        Solid::StorageDrive *drive = device.as<Solid::StorageDrive>();
-
-        if (drive == nullptr) {
-            drive = device.parent().as<Solid::StorageDrive>();
-        }
-
-        bool hotpluggable = false;
-        bool removable = false;
-
-        if (drive != nullptr) {
-            hotpluggable = drive->isHotpluggable();
-            removable = drive->isRemovable();
-        }
-
-        QString iconName;
-        QString text;
-        QString label = data(index, Qt::DisplayRole).toString().replace(QLatin1Char('&'), QLatin1String("&&"));
-
-        if (device.is<Solid::OpticalDisc>()) {
-            text = i18n("&Release '%1'", label);
-        } else if (removable || hotpluggable) {
-            text = i18n("&Safely Remove '%1'", label);
-            iconName = QStringLiteral("media-eject");
-        } else {
-            text = i18n("&Unmount '%1'", label);
-            iconName = QStringLiteral("media-eject");
-        }
-
-        if (!iconName.isEmpty()) {
-            return new QAction(QIcon::fromTheme(iconName), text, nullptr);
-        } else {
-            return new QAction(text, nullptr);
-        }
-    }
-
-    return nullptr;
-}
-
-QAction *SFilePlacesModel::ejectActionForIndex(const QModelIndex &index) const
-{
-    Solid::Device device = deviceForIndex(index);
-
-    if (device.is<Solid::OpticalDisc>()) {
-        QString label = data(index, Qt::DisplayRole).toString().replace(QLatin1Char('&'), QLatin1String("&&"));
-        QString text = i18n("&Eject '%1'", label);
-
-        return new QAction(QIcon::fromTheme(QStringLiteral("media-eject")), text, nullptr);
-    }
-
-    return nullptr;
-}
-
-void SFilePlacesModel::requestTeardown(const QModelIndex &index)
-{
-    Solid::Device device = deviceForIndex(index);
-    Solid::StorageAccess *access = device.as<Solid::StorageAccess>();
-
-    if (access != nullptr) {
-        connect(access, &Solid::StorageAccess::teardownDone, this, [this](Solid::ErrorType error, QVariant errorData) {
-            d->storageTeardownDone(error, errorData);
-        });
-
-        access->teardown();
-    }
-}
-
-void SFilePlacesModel::requestEject(const QModelIndex &index)
-{
-    Solid::Device device = deviceForIndex(index);
-
-    Solid::OpticalDrive *drive = device.parent().as<Solid::OpticalDrive>();
-
-    if (drive != nullptr) {
-        connect(drive, &Solid::OpticalDrive::ejectDone, this, [this](Solid::ErrorType error, QVariant errorData) {
-            d->storageTeardownDone(error, errorData);
-        });
-
-        drive->eject();
-    } else {
-        QString label = data(index, Qt::DisplayRole).toString().replace(QLatin1Char('&'), QLatin1String("&&"));
-        QString message = i18n("The device '%1' is not a disk and cannot be ejected.", label);
-        Q_EMIT errorMessage(message);
-    }
-}
-
-void SFilePlacesModel::requestSetup(const QModelIndex &index)
-{
-    Solid::Device device = deviceForIndex(index);
-
-    if (device.is<Solid::StorageAccess>() && !d->setupInProgress.contains(device.as<Solid::StorageAccess>())
-        && !device.as<Solid::StorageAccess>()->isAccessible()) {
-        Solid::StorageAccess *access = device.as<Solid::StorageAccess>();
-
-        d->setupInProgress[access] = index;
-
-        connect(access, &Solid::StorageAccess::setupDone, this, [this, access](Solid::ErrorType error, QVariant errorData) {
-            d->storageSetupDone(error, errorData, access);
-        });
-
-        access->setup();
-    }
-}
-
-void SFilePlacesModelPrivate::storageSetupDone(Solid::ErrorType error, const QVariant &errorData, Solid::StorageAccess *sender)
-{
-    QPersistentModelIndex index = setupInProgress.take(sender);
-
-    if (!index.isValid()) {
-        return;
-    }
-
-    if (!error) {
-        Q_EMIT q->setupDone(index, true);
-    } else {
-        if (errorData.isValid()) {
-            Q_EMIT q->errorMessage(i18n("An error occurred while accessing '%1', the system responded: %2", q->text(index), errorData.toString()));
-        } else {
-            Q_EMIT q->errorMessage(i18n("An error occurred while accessing '%1'", q->text(index)));
-        }
-        Q_EMIT q->setupDone(index, false);
-    }
-}
-
-void SFilePlacesModelPrivate::storageTeardownDone(Solid::ErrorType error, const QVariant &errorData)
-{
-    if (error && errorData.isValid()) {
-        Q_EMIT q->errorMessage(errorData.toString());
-    }
 }
 
 void SFilePlacesModel::setSupportedSchemes(const QStringList &schemes)
