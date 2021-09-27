@@ -35,6 +35,7 @@ find_package(KF5 REQUIRED
     IconThemes
     KIO
     CoreAddons
+    GuiAddons
     Notifications
     WidgetsAddons
     WindowSystem

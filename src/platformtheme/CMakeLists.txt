@@ -22,6 +22,10 @@ set(platformtheme_SRCS
     sfilemetapreview.cpp
     x11integration.cpp
     main.cpp
+
+    sfileplacesmodel.cpp
+    sfileplacesview.cpp
+    sfileplacesitem.cpp
 )
 
 add_library(SandsmarkPlatformTheme MODULE ${platformtheme_SRCS})
@@ -39,6 +43,7 @@ target_link_libraries(SandsmarkPlatformTheme
         KF5::KIOFileWidgets # KFileFilterCombo, KDirSortFilterProxyModel, KRecentDirs
         KF5::KIOWidgets
         KF5::XmlGui
+        KF5::GuiAddons
         KF5::I18n
         KF5::Notifications
         KF5::WindowSystem

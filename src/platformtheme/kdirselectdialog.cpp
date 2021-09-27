@@ -60,8 +60,8 @@
 #include <KStandardShortcut>
 
 #include "kfiletreeview_p.h"
-#include <kfileplacesview.h>
-#include <kfileplacesmodel.h>
+#include "sfileplacesview.h"
+#include "sfileplacesmodel.h"
 // ### add mutator for treeview!
 
 class KDirSelectDialog::Private
@@ -96,7 +96,7 @@ public:
     KFileTreeView *m_treeView = nullptr;
     QMenu *m_contextMenu = nullptr;
     KActionCollection *m_actions = nullptr;
-    KFilePlacesView *m_placesView = nullptr;
+    SFilePlacesView *m_placesView = nullptr;
     KHistoryComboBox *m_urlCombo = nullptr;
     QString m_recentDirClass;
     QUrl m_startURL;
@@ -312,12 +312,12 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     QVBoxLayout *mainLayout = new QVBoxLayout();
     d->m_actions = new KActionCollection(this);
     d->m_actions->addAssociatedWidget(this);
-    d->m_placesView = new KFilePlacesView(page);
-    d->m_placesView->setModel(new KFilePlacesModel(d->m_placesView));
+    d->m_placesView = new SFilePlacesView(page);
+    d->m_placesView->setModel(new SFilePlacesModel(d->m_placesView));
     d->m_placesView->setObjectName(QStringLiteral("speedbar"));
     d->m_placesView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     d->m_placesView->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-    connect(d->m_placesView, &KFilePlacesView::urlChanged,
+    connect(d->m_placesView, &SFilePlacesView::urlChanged,
             this, &KDirSelectDialog::setCurrentUrl);
     hlay->addWidget(d->m_placesView);
     hlay->addLayout(mainLayout);
