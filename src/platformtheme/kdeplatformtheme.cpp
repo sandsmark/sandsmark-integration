@@ -326,16 +326,10 @@ QPlatformDialogHelper *KdePlatformTheme::createPlatformDialogHelper(QPlatformThe
 {
     switch (type) {
     case QPlatformTheme::FileDialog: {
-        // For some reason the app doesn't quit if it uses a KDEPlatformFileDialogHelper
         QApplication *app = qobject_cast<QApplication*>(qApp);
         if (!app) {
             return nullptr;
         }
-        if (app->thread()->loopLevel() == 0 && app->quitOnLastWindowClosed()) {
-            qWarning() << "QApplication not running and quit on last window closed, which won't work with our file dialog";
-            return nullptr;
-        }
-        qDebug() << "loop level" << app->thread()->loopLevel() << "quit on last window enabled" << app->quitOnLastWindowClosed();
         return new KDEPlatformFileDialogHelper;
     }
     case QPlatformTheme::FontDialog:
