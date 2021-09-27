@@ -40,11 +40,6 @@ private:
     QStackedWidget *m_stack;
     QWidget *m_blankWidget;
     QHash<QString, KPreviewWidgetBase *> m_previewProviders;
-    bool haveAudioPreview;
-
-    // may return 0L
-    static KPreviewWidgetBase *createAudioPreview(QWidget *parent);
-    static bool s_tryAudioPreview;
 
 private:
     class SFileMetaPreviewPrivate;

@@ -17,11 +17,8 @@
 #include <KPluginFactory>
 #include <kimagefilepreview.h>
 
-bool SFileMetaPreview::s_tryAudioPreview = false;
-
 SFileMetaPreview::SFileMetaPreview(QWidget *parent)
-    : KPreviewWidgetBase(parent),
-      haveAudioPreview(false)
+    : KPreviewWidgetBase(parent)
 {
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -52,6 +49,7 @@ void SFileMetaPreview::initPreviewProviders()
     resize(imagePreview->sizeHint());
 
     const QStringList mimeTypes = imagePreview->supportedMimeTypes();
+    qDebug() << mimeTypes;
     QStringList::ConstIterator it = mimeTypes.begin();
     for (; it != mimeTypes.end(); ++it) {
 //         qDebug(".... %s", (*it).toLatin1().constData());
@@ -107,26 +105,6 @@ KPreviewWidgetBase *SFileMetaPreview::previewProviderFor(const QString &mimeType
     }
 
 //qDebug("#### didn't find anything for: %s", mimeType.toLatin1().constData());
-
-    if (s_tryAudioPreview &&
-            !mimeType.startsWith(QLatin1String("text/")) &&
-            !mimeType.startsWith(QLatin1String("image/"))) {
-        if (!haveAudioPreview) {
-            KPreviewWidgetBase *audioPreview = createAudioPreview(m_stack);
-            if (audioPreview) {
-                haveAudioPreview = true;
-                (void) m_stack->addWidget(audioPreview);
-                const QStringList mimeTypes = audioPreview->supportedMimeTypes();
-                QStringList::ConstIterator it = mimeTypes.begin();
-                for (; it != mimeTypes.end(); ++it) {
-                    // only add non already handled mimetypes
-                    if (m_previewProviders.constFind(*it) == m_previewProviders.constEnd()) {
-                        m_previewProviders.insert(*it, audioPreview);
-                    }
-                }
-            }
-        }
-    }
 
     // with the new mimetypes from the audio-preview, try again
     provider = findExistingProvider(mimeType, mimeInfo);
@@ -189,22 +167,3 @@ void SFileMetaPreview::clearPreviewProviders()
     m_previewProviders.clear();
 }
 
-// static
-KPreviewWidgetBase *SFileMetaPreview::createAudioPreview(QWidget *parent)
-{
-    if (!s_tryAudioPreview) {
-        return nullptr;
-    }
-    QPluginLoader loader(QStringLiteral("kfileaudiopreview"));
-    KPluginFactory *factory = qobject_cast<KPluginFactory*>(loader.instance());
-    if (!factory) {
-        qWarning() << "Couldn't load kfileaudiopreview" << loader.errorString();
-        s_tryAudioPreview = false;
-        return nullptr;
-    }
-    KPreviewWidgetBase *w = factory->create<KPreviewWidgetBase>(parent);
-    if (w) {
-        w->setObjectName(QStringLiteral("kfileaudiopreview"));
-    }
-    return w;
-}
