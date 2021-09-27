@@ -53,13 +53,13 @@ static const char GeneralId[] =      "General";
 static const char DefaultFont[] =    "Noto Sans";
 
 static const KFontData DefaultFontData[KFontSettingsData::FontTypesCount] = {
-    { GeneralId, "font",                 DefaultFont,  10, -1, QFont::SansSerif, "Regular" },
-    { GeneralId, "fixed",                "Hack",       10, -1, QFont::Monospace, "Regular" },
-    { GeneralId, "toolBarFont",          DefaultFont,  10, -1, QFont::SansSerif, "Regular" },
-    { GeneralId, "menuFont",             DefaultFont,  10, -1, QFont::SansSerif, "Regular" },
-    { "WM",      "activeFont",           DefaultFont,  10, -1, QFont::SansSerif, "Regular" },
-    { GeneralId, "taskbarFont",          DefaultFont,  10, -1, QFont::SansSerif, "Regular" },
-    { GeneralId, "smallestReadableFont", DefaultFont,   9, -1, QFont::SansSerif, "Regular" }
+    { GeneralId, "font",                 DefaultFont,  10, QFont::Normal, QFont::SansSerif, "Regular" },
+    { GeneralId, "fixed",                "Hack",       10, QFont::Normal, QFont::Monospace, "Regular" },
+    { GeneralId, "toolBarFont",          DefaultFont,  10, QFont::Normal, QFont::SansSerif, "Regular" },
+    { GeneralId, "menuFont",             DefaultFont,  10, QFont::Normal, QFont::SansSerif, "Regular" },
+    { "WM",      "activeFont",           DefaultFont,  10, QFont::Normal, QFont::SansSerif, "Regular" },
+    { GeneralId, "taskbarFont",          DefaultFont,  10, QFont::Normal, QFont::SansSerif, "Regular" },
+    { GeneralId, "smallestReadableFont", DefaultFont,   9, QFont::Normal, QFont::SansSerif, "Regular" }
 };
 
 QFont *KFontSettingsData::font(FontTypes fontType)
@@ -77,10 +77,6 @@ QFont *KFontSettingsData::font(FontTypes fontType)
         //NOTE: We are not using KConfig directly because we can't call QFont::QFont from here
         if (!fontInfo.isEmpty()) {
             cachedFont->fromString(fontInfo);
-        } else {
-            // set the canonical stylename here, where it cannot override
-            // user-specific font attributes if those do not include a stylename.
-            cachedFont->setStyleName(QLatin1String(fontData.StyleName));
         }
 
         mFonts[fontType] = cachedFont;
