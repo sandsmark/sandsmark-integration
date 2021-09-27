@@ -13,8 +13,8 @@
 
 #include <QDebug>
 #include <kio/previewjob.h>
-#include <kpluginloader.h>
-#include <kpluginfactory.h>
+#include <QPluginLoader>
+#include <KPluginFactory>
 #include <kimagefilepreview.h>
 
 bool SFileMetaPreview::s_tryAudioPreview = true;
@@ -192,8 +192,11 @@ void SFileMetaPreview::clearPreviewProviders()
 // static
 KPreviewWidgetBase *SFileMetaPreview::createAudioPreview(QWidget *parent)
 {
-    KPluginLoader loader(QStringLiteral("kfileaudiopreview"));
-    KPluginFactory *factory = loader.factory();
+    if (!s_tryAudioPreview) {
+        return nullptr;
+    }
+    QPluginLoader loader(QStringLiteral("kfileaudiopreview"));
+    KPluginFactory *factory = qobject_cast<KPluginFactory*>(loader.instance());
     if (!factory) {
         qWarning() << "Couldn't load kfileaudiopreview" << loader.errorString();
         s_tryAudioPreview = false;

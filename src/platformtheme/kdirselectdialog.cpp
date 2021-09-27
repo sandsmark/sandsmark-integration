@@ -335,13 +335,13 @@ KDirSelectDialog::KDirSelectDialog(const QUrl &startDir, bool localOnly, QWidget
     d->m_urlCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     d->m_urlCombo->setTrapReturnKey(true);
     d->m_urlCombo->setIconProvider([this](const QString &name) {
-        const QSize iconSize = this->d->m_urlCombo->iconSize();
-        const int size = qMax(iconSize.width(), iconSize.height());
+        QUrl url;
         if (QFile::exists(name)) {
-            return KIO::pixmapForUrl(QUrl::fromLocalFile(name), 0, KIconLoader::Desktop, size);
+            url = QUrl::fromLocalFile(name);
         } else {
-            return KIO::pixmapForUrl(QUrl(name), 0, KIconLoader::Desktop, size);
+            url = QUrl(name);
         }
+        return QIcon::fromTheme(KIO::iconNameForUrl(url));
     });
     KUrlCompletion *comp = new KUrlCompletion();
     comp->setMode(KUrlCompletion::DirCompletion);
